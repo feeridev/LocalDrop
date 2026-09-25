@@ -97,3 +97,101 @@ LocalDrop/
 ├── requirements.txt
 ├── .gitignore
 └── README.md
+Installation
+1. Clone the repository
+git clone git@github.com:feeridev/LocalDrop.git
+cd LocalDrop
+2. Create a virtual environment
+python3 -m venv .venv
+3. Activate the virtual environment
+
+Linux/macOS:
+
+source .venv/bin/activate
+
+Windows:
+
+.venv\Scripts\activate
+4. Install dependencies
+python -m pip install -r requirements.txt
+Running LocalDrop
+
+Start the development server:
+
+python -m uvicorn app.main:app --reload
+
+Then open:
+
+http://127.0.0.1:8000
+
+For LAN access, run Uvicorn on all interfaces:
+
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+Other devices on the same network can then access LocalDrop using:
+
+http://YOUR-COMPUTER-IP:8000
+
+For example:
+
+http://192.168.1.100:8000
+How It Works
+
+LocalDrop stores uploaded files locally instead of sending them to an
+external cloud service.
+
+Public files are stored separately from private files.
+
+Private file access is controlled through the application database. A private
+file can only be downloaded by its owner or the user it was sent to.
+
+Passwords are never stored as plaintext. They are hashed using Argon2.
+
+Current Development Status
+
+LocalDrop is currently under active development.
+
+Implemented:
+
+ User registration
+ Login/logout
+ Session authentication
+ Public file upload
+ Public file download
+ Private file transfer
+ Access control
+ File deletion
+ File metadata
+ File icons
+ Drag & drop uploads
+ Upload progress
+
+Planned:
+
+ Multi-file upload
+ File search
+ Sorting and filtering
+ File preview
+ Folder support
+ File rename
+ Share links
+ ZIP downloads
+ Administration/settings
+ Improved mobile interface
+ Windows desktop package
+ Windows installer
+Security Notes
+
+LocalDrop is currently intended for trusted local network environments.
+
+Before exposing the application to untrusted networks or the public internet,
+additional security measures should be implemented, including production
+configuration, secure cookies, HTTPS, upload limits, rate limiting, and
+additional authorization controls.
+
+Development
+
+LocalDrop is being developed incrementally with Git.
+
+Each major feature is developed and committed separately to keep the project
+history easy to understand and maintain.
