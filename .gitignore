@@ -5,27 +5,29 @@ __pycache__/
 
 # Virtual environment
 .venv/
+venv/
+env/
 
-# Environment variables / secrets
+# Environment / secrets
 .env
 .env.*
+!.env.example
 
-# Local application data
-data/*
-!data/.gitkeep
+# Local database
+data/localdrop.db
 
-# SQLite databases
-*.db
-*.sqlite
-*.sqlite3
+# Uploaded files
+data/public/*
+data/private/*
 
-# IDE
+# Keep data directories in Git
+!data/public/.gitkeep
+!data/private/.gitkeep
+
+# IDE / editors
 .vscode/
 .idea/
-
-# OS files
-.DS_Store
-Thumbs.db
+*.code-workspace
 
 # Tests / coverage
 .pytest_cache/
@@ -35,3 +37,7 @@ htmlcov/
 # Logs
 *.log
 logs/
+
+# OS files
+.DS_Store
+Thumbs.db

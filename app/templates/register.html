@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LocalDrop - Create Account</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 400px;
+
+            padding: 32px;
+
+            background: white;
+            border-radius: 12px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            text-align: center;
+        }
+
+        .subtitle {
+            margin-bottom: 28px;
+            text-align: center;
+            color: #666;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+
+            border: 1px solid #ccc;
+            border-radius: 8px;
+
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+
+            border: 0;
+            border-radius: 8px;
+
+            background: #222;
+            color: white;
+
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .link {
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .link a {
+            color: #222;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #message {
+            margin-top: 16px;
+            text-align: center;
+            color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <h1>LocalDrop</h1>
+
+    <div class="subtitle">
+        Create your account
+    </div>
+
+    <form id="register-form">
+
+        <label for="username">
+            Username
+        </label>
+
+        <input
+            id="username"
+            type="text"
+            minlength="3"
+            maxlength="50"
+            autocomplete="username"
+            required
+        >
+
+        <label for="password">
+            Password
+        </label>
+
+        <input
+            id="password"
+            type="password"
+            minlength="8"
+            maxlength="128"
+            autocomplete="new-password"
+            required
+        >
+
+        <button type="submit">
+            Create Account
+        </button>
+
+    </form>
+
+    <div id="message"></div>
+
+    <div class="link">
+        Already have an account?
+        <a href="/">
+            Login
+        </a>
+    </div>
+
+</div>
+
+
+<script>
+
+const form =
+    document.getElementById("register-form");
+
+const message =
+    document.getElementById("message");
+
+
+form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    message.textContent = "";
+
+    const username =
+        document.getElementById("username").value;
+
+    const password =
+        document.getElementById("password").value;
+
+
+    try {
+
+        const response =
+            await fetch("/auth/register", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+
+            });
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            message.textContent =
+                data.detail || "Registration failed";
+
+            return;
+        }
+
+
+        window.location.href = "/";
+
+    } catch (error) {
+
+        message.textContent =
+            "Unable to connect to LocalDrop";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
