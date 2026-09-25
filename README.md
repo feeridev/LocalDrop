@@ -235,4 +235,6 @@ New features will be added through separate commits so the Git history shows how
 
 ## 📄 License
 
-License information will be added later.
+LocalDrop is licensed under the MIT License.
+
+Copyright (c) 2026 Farshad
