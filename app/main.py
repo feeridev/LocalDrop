@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from fastapi.staticfiles import StaticFiles
 from app.api.auth import router as auth_router
 from app.api.files import router as files_router
 from app.database.database import Base, engine
@@ -24,6 +24,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.mount(
+    "/static",
+    StaticFiles(directory="app/static"),
+    name="static",
+)
+
+templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(auth_router)
 app.include_router(files_router)
