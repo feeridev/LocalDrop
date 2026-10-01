@@ -4,6 +4,7 @@ from secrets import token_hex
 from fastapi import (
     APIRouter,
     Depends,
+    File as UploadFileField,
     HTTPException,
     UploadFile,
     status,
@@ -49,63 +50,73 @@ PRIVATE_STORAGE.mkdir(
     status_code=status.HTTP_201_CREATED,
 )
 async def upload_file(
-    uploaded_file: UploadFile,
+    uploaded_file: list[UploadFile] = UploadFileField(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if not uploaded_file.filename:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Filename is required",
-        )
+    uploaded_files = []
+    stored_paths = []
 
-    original_name = Path(
-        uploaded_file.filename
-    ).name
+    try:
+        for file in uploaded_file:
+            if not file.filename:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Filename is required",
+                )
 
-    extension = Path(
-        original_name
-    ).suffix
+            original_name = Path(file.filename).name
+            extension = Path(original_name).suffix
+            stored_name = f"{token_hex(16)}{extension}"
 
-    stored_name = (
-        f"{token_hex(16)}{extension}"
-    )
+            destination = PUBLIC_STORAGE / stored_name
 
-    destination = (
-        PUBLIC_STORAGE / stored_name
-    )
+            file_size = 0
 
-    file_size = 0
+            with destination.open("wb") as destination_file:
+                while chunk := await file.read(1024 * 1024):
+                    destination_file.write(chunk)
+                    file_size += len(chunk)
 
-    with destination.open("wb") as file:
+            stored_paths.append(destination)
 
-        while chunk := await uploaded_file.read(
-            1024 * 1024
-        ):
-            file.write(chunk)
-            file_size += len(chunk)
+            record = File(
+                owner_id=current_user.id,
+                original_name=original_name,
+                stored_name=stored_name,
+                storage_path=str(destination),
+                size=file_size,
+                visibility="public",
+            )
 
-    record = File(
-        owner_id=current_user.id,
-        original_name=original_name,
-        stored_name=stored_name,
-        storage_path=str(destination),
-        size=file_size,
-        visibility="public",
-    )
+            db.add(record)
+            db.flush()
 
-    db.add(record)
-    db.commit()
-    db.refresh(record)
+            uploaded_files.append(
+                {
+                    "id": record.id,
+                    "filename": record.original_name,
+                    "size": record.size,
+                    "owner_id": record.owner_id,
+                    "owner_username": current_user.username,
+                    "visibility": record.visibility,
+                    "created_at": record.created_at,
+                }
+            )
+
+        db.commit()
+
+    except Exception:
+        db.rollback()
+
+        for stored_path in stored_paths:
+            if stored_path.is_file():
+                stored_path.unlink()
+
+        raise
 
     return {
-        "id": record.id,
-        "filename": record.original_name,
-        "size": record.size,
-        "owner_id": record.owner_id,
-        "owner_username": current_user.username,
-        "visibility": record.visibility,
-        "created_at": record.created_at,
+        "files": uploaded_files
     }
 
 
@@ -131,7 +142,6 @@ def list_files(
     result = []
 
     for file in files:
-
         owner = db.get(
             User,
             file.owner_id,
@@ -165,17 +175,11 @@ def list_files(
     status_code=status.HTTP_201_CREATED,
 )
 async def upload_private_file(
-    uploaded_file: UploadFile,
-    recipient_username: str,
+    uploaded_file: list[UploadFile] = UploadFileField(...),
+    recipient_username: str = "",
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if not uploaded_file.filename:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Filename is required",
-        )
-
     recipient_username = (
         recipient_username
         .strip()
@@ -200,62 +204,76 @@ async def upload_private_file(
             detail="You cannot send a private file to yourself",
         )
 
-    original_name = Path(
-        uploaded_file.filename
-    ).name
+    uploaded_files = []
+    stored_paths = []
 
-    extension = Path(
-        original_name
-    ).suffix
+    try:
+        for file in uploaded_file:
+            if not file.filename:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Filename is required",
+                )
 
-    stored_name = (
-        f"{token_hex(16)}{extension}"
-    )
+            original_name = Path(file.filename).name
+            extension = Path(original_name).suffix
+            stored_name = f"{token_hex(16)}{extension}"
 
-    destination = (
-        PRIVATE_STORAGE / stored_name
-    )
+            destination = PRIVATE_STORAGE / stored_name
 
-    file_size = 0
+            file_size = 0
 
-    with destination.open("wb") as file:
+            with destination.open("wb") as destination_file:
+                while chunk := await file.read(1024 * 1024):
+                    destination_file.write(chunk)
+                    file_size += len(chunk)
 
-        while chunk := await uploaded_file.read(
-            1024 * 1024
-        ):
-            file.write(chunk)
-            file_size += len(chunk)
+            stored_paths.append(destination)
 
-    record = File(
-        owner_id=current_user.id,
-        original_name=original_name,
-        stored_name=stored_name,
-        storage_path=str(destination),
-        size=file_size,
-        visibility="private",
-    )
+            record = File(
+                owner_id=current_user.id,
+                original_name=original_name,
+                stored_name=stored_name,
+                storage_path=str(destination),
+                size=file_size,
+                visibility="private",
+            )
 
-    db.add(record)
-    db.flush()
+            db.add(record)
+            db.flush()
 
-    recipient_record = FileRecipient(
-        file_id=record.id,
-        recipient_id=recipient.id,
-    )
+            recipient_record = FileRecipient(
+                file_id=record.id,
+                recipient_id=recipient.id,
+            )
 
-    db.add(recipient_record)
+            db.add(recipient_record)
 
-    db.commit()
-    db.refresh(record)
+            uploaded_files.append(
+                {
+                    "id": record.id,
+                    "filename": record.original_name,
+                    "size": record.size,
+                    "visibility": record.visibility,
+                    "sender": current_user.username,
+                    "recipient": recipient.username,
+                    "created_at": record.created_at,
+                }
+            )
+
+        db.commit()
+
+    except Exception:
+        db.rollback()
+
+        for stored_path in stored_paths:
+            if stored_path.is_file():
+                stored_path.unlink()
+
+        raise
 
     return {
-        "id": record.id,
-        "filename": record.original_name,
-        "size": record.size,
-        "visibility": record.visibility,
-        "sender": current_user.username,
-        "recipient": recipient.username,
-        "created_at": record.created_at,
+        "files": uploaded_files
     }
 
 
@@ -275,8 +293,7 @@ def list_received_files(
             FileRecipient.file_id == File.id,
         )
         .where(
-            FileRecipient.recipient_id
-            == current_user.id,
+            FileRecipient.recipient_id == current_user.id,
             File.visibility == "private",
         )
         .order_by(
@@ -287,7 +304,6 @@ def list_received_files(
     result = []
 
     for file in files:
-
         sender = db.get(
             User,
             file.owner_id,
@@ -335,11 +351,9 @@ def list_sent_files(
     result = []
 
     for file in files:
-
         recipient_record = db.scalar(
             select(FileRecipient).where(
-                FileRecipient.file_id
-                == file.id
+                FileRecipient.file_id == file.id
             )
         )
 
@@ -441,32 +455,23 @@ def download_file(
         )
 
     if file_record.visibility == "public":
-
         allowed = True
 
     elif file_record.visibility == "private":
-
         is_owner = (
-            file_record.owner_id
-            == current_user.id
+            file_record.owner_id == current_user.id
         )
 
         is_recipient = db.scalar(
             select(FileRecipient).where(
-                FileRecipient.file_id
-                == file_record.id,
-                FileRecipient.recipient_id
-                == current_user.id,
+                FileRecipient.file_id == file_record.id,
+                FileRecipient.recipient_id == current_user.id,
             )
         ) is not None
 
-        allowed = (
-            is_owner
-            or is_recipient
-        )
+        allowed = is_owner or is_recipient
 
     else:
-
         allowed = False
 
     if not allowed:

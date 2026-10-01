@@ -1,19 +1,23 @@
+/*
+ * =========================================================
+ * LOCALDROP DASHBOARD
+ * =========================================================
+ */
 
 
 /*
- * ==========================================
+ * =========================================================
  * GLOBAL STATE
- * ==========================================
+ * =========================================================
  */
 
 let currentUserId = null;
 
 
-
 /*
- * ==========================================
+ * =========================================================
  * FORMAT FILE SIZE
- * ==========================================
+ * =========================================================
  */
 
 function formatFileSize(size) {
@@ -74,9 +78,9 @@ function formatFileSize(size) {
 
 
 /*
- * ==========================================
+ * =========================================================
  * FORMAT DATE
- * ==========================================
+ * =========================================================
  */
 
 function formatFileDate(dateString) {
@@ -116,12 +120,18 @@ function formatFileDate(dateString) {
 
 
 /*
- * ==========================================
+ * =========================================================
  * FILE ICON
- * ==========================================
+ * =========================================================
  */
 
 function getFileIcon(filename) {
+
+    if (!filename) {
+
+        return "📄";
+    }
+
 
     const extension =
         filename
@@ -179,18 +189,26 @@ function getFileIcon(filename) {
         jsx: "💻",
         ts: "💻",
         tsx: "💻",
+
         py: "🐍",
+
         java: "☕",
+
         c: "💻",
         cpp: "💻",
         h: "💻",
         hpp: "💻",
+
         php: "💻",
+
         html: "🌐",
         css: "🎨",
+
         json: "🧩",
         xml: "🧩",
+
         sql: "🗄️",
+
         sh: "⌨️",
         bat: "⚙️"
 
@@ -198,17 +216,84 @@ function getFileIcon(filename) {
 
 
     return (
-        icons[extension]
-        || "📄"
+        icons[extension] ||
+        "📄"
     );
 }
 
 
 
 /*
- * ==========================================
+ * =========================================================
+ * UPDATE STAT
+ * =========================================================
+ */
+
+function updateStat(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (!element) {
+
+        return;
+    }
+
+
+    element.textContent =
+        String(value);
+}
+
+
+
+/*
+ * =========================================================
+ * UPDATE USER AVATAR
+ * =========================================================
+ */
+
+function updateUserAvatar(username) {
+
+    const avatar =
+        document.getElementById(
+            "user-avatar-letter"
+        );
+
+
+    if (!avatar) {
+
+        return;
+    }
+
+
+    if (!username) {
+
+        avatar.textContent =
+            "U";
+
+        return;
+    }
+
+
+    avatar.textContent =
+        username
+            .trim()
+            .charAt(0)
+            .toUpperCase();
+}
+
+
+
+/*
+ * =========================================================
  * CREATE FILE ELEMENT
- * ==========================================
+ * =========================================================
  */
 
 function createFileElement(
@@ -291,6 +376,7 @@ function createFileElement(
 
     details.appendChild(meta);
 
+
     info.appendChild(icon);
 
     info.appendChild(details);
@@ -303,8 +389,15 @@ function createFileElement(
         "file-actions";
 
 
+    /*
+     * Download
+     */
+
     const downloadButton =
         document.createElement("button");
+
+    downloadButton.type =
+        "button";
 
     downloadButton.className =
         "file-button download";
@@ -315,7 +408,12 @@ function createFileElement(
 
     downloadButton.addEventListener(
         "click",
-        () => downloadFile(file.id)
+        () => {
+
+            downloadFile(
+                file.id
+            );
+        }
     );
 
 
@@ -324,6 +422,13 @@ function createFileElement(
     );
 
 
+    /*
+     * Delete
+     *
+     * Only the owner of a public file
+     * can delete it.
+     */
+
     if (
         type === "public" &&
         Number(file.owner_id) === currentUserId
@@ -331,6 +436,9 @@ function createFileElement(
 
         const deleteButton =
             document.createElement("button");
+
+        deleteButton.type =
+            "button";
 
         deleteButton.className =
             "file-button delete";
@@ -341,7 +449,12 @@ function createFileElement(
 
         deleteButton.addEventListener(
             "click",
-            () => deleteFile(file.id)
+            () => {
+
+                deleteFile(
+                    file.id
+                );
+            }
         );
 
 
@@ -362,50 +475,79 @@ function createFileElement(
 
 
 /*
- * ==========================================
+ * =========================================================
  * LOAD USER
- * ==========================================
+ * =========================================================
  */
 
 async function loadUser() {
 
-    const response =
-        await fetch(
-            "/auth/me",
-            {
-                credentials: "include"
-            }
+    try {
+
+        const response =
+            await fetch(
+                "/auth/me",
+                {
+                    credentials:
+                        "include"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            window.location.href =
+                "/";
+
+            return false;
+        }
+
+
+        const user =
+            await response.json();
+
+
+        currentUserId =
+            Number(user.id);
+
+
+        const usernameElement =
+            document.getElementById(
+                "username"
+            );
+
+
+        if (usernameElement) {
+
+            usernameElement.textContent =
+                user.username;
+        }
+
+
+        updateUserAvatar(
+            user.username
         );
 
 
-    if (!response.ok) {
-
-        window.location.href = "/";
-
-        return;
+        return true;
     }
 
 
-    const user =
-        await response.json();
+    catch (error) {
 
+        window.location.href =
+            "/";
 
-    currentUserId =
-        Number(user.id);
-
-
-    document
-        .getElementById("username")
-        .textContent =
-        user.username;
+        return false;
+    }
 }
 
 
 
 /*
- * ==========================================
+ * =========================================================
  * LOAD PUBLIC FILES
- * ==========================================
+ * =========================================================
  */
 
 async function loadPublicFiles() {
@@ -416,13 +558,20 @@ async function loadPublicFiles() {
         );
 
 
+    if (!container) {
+
+        return;
+    }
+
+
     try {
 
         const response =
             await fetch(
                 "/files/",
                 {
-                    credentials: "include"
+                    credentials:
+                        "include"
                 }
             );
 
@@ -432,12 +581,23 @@ async function loadPublicFiles() {
             container.innerHTML =
                 '<div class="empty">Unable to load files.</div>';
 
+            updateStat(
+                "public-file-count",
+                "—"
+            );
+
             return;
         }
 
 
         const files =
             await response.json();
+
+
+        updateStat(
+            "public-file-count",
+            files.length
+        );
 
 
         container.innerHTML = "";
@@ -464,19 +624,25 @@ async function loadPublicFiles() {
 
     }
 
+
     catch (error) {
 
         container.innerHTML =
             '<div class="empty">Unable to connect to LocalDrop.</div>';
+
+        updateStat(
+            "public-file-count",
+            "—"
+        );
     }
 }
 
 
 
 /*
- * ==========================================
+ * =========================================================
  * LOAD USERS
- * ==========================================
+ * =========================================================
  */
 
 async function loadUsers() {
@@ -487,13 +653,20 @@ async function loadUsers() {
         );
 
 
+    if (!select) {
+
+        return;
+    }
+
+
     try {
 
         const response =
             await fetch(
                 "/auth/users",
                 {
-                    credentials: "include"
+                    credentials:
+                        "include"
                 }
             );
 
@@ -529,7 +702,9 @@ async function loadUsers() {
             );
 
 
-        defaultOption.value = "";
+        defaultOption.value =
+            "";
+
 
         defaultOption.textContent =
             "Select a user...";
@@ -551,6 +726,7 @@ async function loadUsers() {
             option.value =
                 user.username;
 
+
             option.textContent =
                 user.username;
 
@@ -562,6 +738,7 @@ async function loadUsers() {
 
     }
 
+
     catch (error) {
 
         select.innerHTML =
@@ -572,9 +749,9 @@ async function loadUsers() {
 
 
 /*
- * ==========================================
- * LOAD RECEIVED
- * ==========================================
+ * =========================================================
+ * LOAD RECEIVED FILES
+ * =========================================================
  */
 
 async function loadReceivedFiles() {
@@ -585,13 +762,20 @@ async function loadReceivedFiles() {
         );
 
 
+    if (!container) {
+
+        return;
+    }
+
+
     try {
 
         const response =
             await fetch(
                 "/files/private/received",
                 {
-                    credentials: "include"
+                    credentials:
+                        "include"
                 }
             );
 
@@ -601,12 +785,23 @@ async function loadReceivedFiles() {
             container.innerHTML =
                 '<div class="empty">Unable to load received files.</div>';
 
+            updateStat(
+                "received-file-count",
+                "—"
+            );
+
             return;
         }
 
 
         const files =
             await response.json();
+
+
+        updateStat(
+            "received-file-count",
+            files.length
+        );
 
 
         container.innerHTML = "";
@@ -633,19 +828,25 @@ async function loadReceivedFiles() {
 
     }
 
+
     catch (error) {
 
         container.innerHTML =
             '<div class="empty">Unable to connect to LocalDrop.</div>';
+
+        updateStat(
+            "received-file-count",
+            "—"
+        );
     }
 }
 
 
 
 /*
- * ==========================================
- * LOAD SENT
- * ==========================================
+ * =========================================================
+ * LOAD SENT FILES
+ * =========================================================
  */
 
 async function loadSentFiles() {
@@ -656,13 +857,20 @@ async function loadSentFiles() {
         );
 
 
+    if (!container) {
+
+        return;
+    }
+
+
     try {
 
         const response =
             await fetch(
                 "/files/private/sent",
                 {
-                    credentials: "include"
+                    credentials:
+                        "include"
                 }
             );
 
@@ -672,12 +880,23 @@ async function loadSentFiles() {
             container.innerHTML =
                 '<div class="empty">Unable to load sent files.</div>';
 
+            updateStat(
+                "sent-file-count",
+                "—"
+            );
+
             return;
         }
 
 
         const files =
             await response.json();
+
+
+        updateStat(
+            "sent-file-count",
+            files.length
+        );
 
 
         container.innerHTML = "";
@@ -704,19 +923,25 @@ async function loadSentFiles() {
 
     }
 
+
     catch (error) {
 
         container.innerHTML =
             '<div class="empty">Unable to connect to LocalDrop.</div>';
+
+        updateStat(
+            "sent-file-count",
+            "—"
+        );
     }
 }
 
 
 
 /*
- * ==========================================
+ * =========================================================
  * DOWNLOAD
- * ==========================================
+ * =========================================================
  */
 
 function downloadFile(fileId) {
@@ -728,9 +953,9 @@ function downloadFile(fileId) {
 
 
 /*
- * ==========================================
+ * =========================================================
  * DELETE
- * ==========================================
+ * =========================================================
  */
 
 async function deleteFile(fileId) {
@@ -761,8 +986,20 @@ async function deleteFile(fileId) {
             );
 
 
-        const data =
-            await response.json();
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+
+        catch {
+
+            data = {};
+        }
 
 
         if (!response.ok) {
@@ -780,6 +1017,7 @@ async function deleteFile(fileId) {
 
     }
 
+
     catch (error) {
 
         alert(
@@ -791,19 +1029,9 @@ async function deleteFile(fileId) {
 
 
 /*
- * ==========================================
+ * =========================================================
  * UPLOAD CONTROLLER
- * ==========================================
- *
- * This handles:
- *
- * - click
- * - drag & drop
- * - file selection
- * - progress
- * - success
- * - failure
- *
+ * =========================================================
  */
 
 function createUploadController(config) {
@@ -823,24 +1051,6 @@ function createUploadController(config) {
     const selected =
         document.getElementById(
             config.selectedId
-        );
-
-
-    const selectedName =
-        document.getElementById(
-            config.selectedNameId
-        );
-
-
-    const selectedSize =
-        document.getElementById(
-            config.selectedSizeId
-        );
-
-
-    const removeButton =
-        document.getElementById(
-            config.removeId
         );
 
 
@@ -880,31 +1090,86 @@ function createUploadController(config) {
         );
 
 
-    let selectedFile = null;
+    if (
+        !zone ||
+        !input ||
+        !selected ||
+        !uploadButton
+    ) {
+
+        console.error(
+            `Upload controller could not initialize: ${config.zoneId}`
+        );
+
+
+        return {
+
+            upload:
+                async () => {},
+
+            clearFiles:
+                () => {}
+
+        };
+    }
+
+
+    input.multiple =
+        true;
+
+
+    let selectedFiles = [];
 
     let uploading = false;
 
 
 
     /*
-     * --------------------------------------
-     * SHOW SELECTED FILE
-     * --------------------------------------
+     * =====================================================
+     * TOTAL SIZE
+     * =====================================================
      */
 
-    function showSelectedFile(file) {
+    function getTotalSize() {
 
-        selectedFile = file;
+        return selectedFiles.reduce(
+            (
+                total,
+                file
+            ) => {
+
+                return total + file.size;
+
+            },
+            0
+        );
+    }
 
 
-        selectedName.textContent =
-            file.name;
 
+    /*
+     * =====================================================
+     * UPDATE SELECTED FILES UI
+     * =====================================================
+     */
 
-        selectedSize.textContent =
-            formatFileSize(
-                file.size
+    function updateSummary() {
+
+        if (
+            selectedFiles.length === 0
+        ) {
+
+            selected.classList.remove(
+                "visible"
             );
+
+
+            selected.innerHTML =
+                "";
+
+
+            return;
+        }
 
 
         selected.classList.add(
@@ -912,21 +1177,228 @@ function createUploadController(config) {
         );
 
 
-        message.textContent = "";
+        selected.innerHTML =
+            "";
 
-        message.className =
-            "message";
+
+        const summary =
+            document.createElement(
+                "div"
+            );
+
+
+        summary.className =
+            "multi-file-summary";
+
+
+        summary.textContent =
+            `${selectedFiles.length} file${selectedFiles.length === 1 ? "" : "s"} • ${formatFileSize(getTotalSize())}`;
+
+
+        const list =
+            document.createElement(
+                "div"
+            );
+
+
+        list.className =
+            "multi-file-list";
+
+
+        selectedFiles.forEach(
+            (
+                file,
+                index
+            ) => {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "multi-file-item";
+
+
+                const info =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                info.className =
+                    "multi-file-info";
+
+
+                const icon =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                icon.className =
+                    "multi-file-icon";
+
+
+                icon.textContent =
+                    getFileIcon(
+                        file.name
+                    );
+
+
+                const details =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                details.className =
+                    "multi-file-details";
+
+
+                const name =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                name.className =
+                    "multi-file-name";
+
+
+                name.textContent =
+                    file.name;
+
+
+                const size =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                size.className =
+                    "multi-file-size";
+
+
+                size.textContent =
+                    formatFileSize(
+                        file.size
+                    );
+
+
+                details.appendChild(
+                    name
+                );
+
+
+                details.appendChild(
+                    size
+                );
+
+
+                info.appendChild(
+                    icon
+                );
+
+
+                info.appendChild(
+                    details
+                );
+
+
+                const removeButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                removeButton.type =
+                    "button";
+
+
+                removeButton.className =
+                    "multi-file-remove";
+
+
+                removeButton.textContent =
+                    "×";
+
+
+                removeButton.title =
+                    "Remove file";
+
+
+                removeButton.disabled =
+                    uploading;
+
+
+                removeButton.addEventListener(
+                    "click",
+                    event => {
+
+                        event.stopPropagation();
+
+
+                        if (uploading) {
+
+                            return;
+                        }
+
+
+                        selectedFiles.splice(
+                            index,
+                            1
+                        );
+
+
+                        input.value =
+                            "";
+
+
+                        updateSummary();
+
+                    }
+                );
+
+
+                item.appendChild(
+                    info
+                );
+
+
+                item.appendChild(
+                    removeButton
+                );
+
+
+                list.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+        selected.appendChild(
+            summary
+        );
+
+
+        selected.appendChild(
+            list
+        );
     }
 
 
 
     /*
-     * --------------------------------------
-     * CLEAR FILE
-     * --------------------------------------
+     * =====================================================
+     * ADD FILES
+     * =====================================================
      */
 
-    function clearFile() {
+    function addFiles(files) {
 
         if (uploading) {
 
@@ -934,9 +1406,66 @@ function createUploadController(config) {
         }
 
 
-        selectedFile = null;
+        for (
+            const file of Array.from(
+                files || []
+            )
+        ) {
 
-        input.value = "";
+            const duplicate =
+                selectedFiles.some(
+                    existing =>
+                        existing.name === file.name &&
+                        existing.size === file.size &&
+                        existing.lastModified ===
+                            file.lastModified
+                );
+
+
+            if (!duplicate) {
+
+                selectedFiles.push(
+                    file
+                );
+            }
+        }
+
+
+        if (message) {
+
+            message.textContent =
+                "";
+
+
+            message.className =
+                "message";
+        }
+
+
+        updateSummary();
+    }
+
+
+
+    /*
+     * =====================================================
+     * CLEAR FILES
+     * =====================================================
+     */
+
+    function clearFiles() {
+
+        if (uploading) {
+
+            return;
+        }
+
+
+        selectedFiles = [];
+
+
+        input.value =
+            "";
 
 
         selected.classList.remove(
@@ -944,51 +1473,30 @@ function createUploadController(config) {
         );
 
 
-        selectedName.textContent =
-            "";
-
-        selectedSize.textContent =
+        selected.innerHTML =
             "";
 
 
-        message.textContent =
-            "";
+        if (message) {
 
-        message.className =
-            "message";
+            message.textContent =
+                "";
+
+
+            message.className =
+                "message";
+        }
+
+
+        resetProgress();
     }
 
 
 
     /*
-     * --------------------------------------
-     * SELECT FILE
-     * --------------------------------------
-     */
-
-    function handleFile(file) {
-
-        if (!file) {
-
-            return;
-        }
-
-
-        if (uploading) {
-
-            return;
-        }
-
-
-        showSelectedFile(file);
-    }
-
-
-
-    /*
-     * --------------------------------------
+     * =====================================================
      * INPUT CHANGE
-     * --------------------------------------
+     * =====================================================
      */
 
     input.addEventListener(
@@ -1000,8 +1508,8 @@ function createUploadController(config) {
                 input.files.length > 0
             ) {
 
-                handleFile(
-                    input.files[0]
+                addFiles(
+                    input.files
                 );
             }
         }
@@ -1010,28 +1518,41 @@ function createUploadController(config) {
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * CLICK ZONE
-     * --------------------------------------
+     * =====================================================
      */
 
     zone.addEventListener(
         "click",
-        () => {
+        event => {
 
-            if (!uploading) {
+            if (uploading) {
 
-                input.click();
+                return;
             }
+
+
+            if (
+                event.target.closest(
+                    ".multi-file-remove"
+                )
+            ) {
+
+                return;
+            }
+
+
+            input.click();
         }
     );
 
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * DRAG ENTER
-     * --------------------------------------
+     * =====================================================
      */
 
     zone.addEventListener(
@@ -1040,6 +1561,7 @@ function createUploadController(config) {
 
             event.preventDefault();
 
+
             if (!uploading) {
 
                 zone.classList.add(
@@ -1052,10 +1574,10 @@ function createUploadController(config) {
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * DRAG OVER
-     * --------------------------------------
- */
+     * =====================================================
+     */
 
     zone.addEventListener(
         "dragover",
@@ -1063,6 +1585,7 @@ function createUploadController(config) {
 
             event.preventDefault();
 
+
             if (!uploading) {
 
                 zone.classList.add(
@@ -1075,9 +1598,9 @@ function createUploadController(config) {
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * DRAG LEAVE
-     * --------------------------------------
+     * =====================================================
      */
 
     zone.addEventListener(
@@ -1085,6 +1608,7 @@ function createUploadController(config) {
         event => {
 
             event.preventDefault();
+
 
             zone.classList.remove(
                 "dragover"
@@ -1095,9 +1619,9 @@ function createUploadController(config) {
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * DROP
-     * --------------------------------------
+     * =====================================================
      */
 
     zone.addEventListener(
@@ -1105,6 +1629,7 @@ function createUploadController(config) {
         event => {
 
             event.preventDefault();
+
 
             zone.classList.remove(
                 "dragover"
@@ -1117,46 +1642,18 @@ function createUploadController(config) {
             }
 
 
-            const files =
-                event.dataTransfer.files;
-
-
-            if (
-                files &&
-                files.length > 0
-            ) {
-
-                handleFile(
-                    files[0]
-                );
-            }
+            addFiles(
+                event.dataTransfer.files
+            );
         }
     );
 
 
 
     /*
-     * --------------------------------------
-     * REMOVE
-     * --------------------------------------
-     */
-
-    removeButton.addEventListener(
-        "click",
-        event => {
-
-            event.stopPropagation();
-
-            clearFile();
-        }
-    );
-
-
-
-    /*
-     * --------------------------------------
+     * =====================================================
      * SET PROGRESS
-     * --------------------------------------
+     * =====================================================
      */
 
     function setProgress(
@@ -1164,66 +1661,267 @@ function createUploadController(config) {
         status
     ) {
 
-        progress.classList.add(
-            "visible"
-        );
+        if (progress) {
+
+            progress.classList.add(
+                "visible"
+            );
+        }
 
 
-        progressPercent.textContent =
-            `${percent}%`;
+        if (progressPercent) {
+
+            progressPercent.textContent =
+                `${percent}%`;
+        }
 
 
-        progressStatus.textContent =
-            status;
+        if (progressStatus) {
+
+            progressStatus.textContent =
+                status;
+        }
 
 
-        progressBar.style.width =
-            `${percent}%`;
+        if (progressBar) {
+
+            progressBar.style.width =
+                `${percent}%`;
+        }
     }
 
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * RESET PROGRESS
-     * --------------------------------------
+     * =====================================================
      */
 
     function resetProgress() {
+
+        if (!progress) {
+
+            return;
+        }
+
 
         progress.classList.remove(
             "visible"
         );
 
 
-        progressBar.classList.remove(
-            "success"
-        );
+        if (progressBar) {
+
+            progressBar.classList.remove(
+                "success",
+                "error"
+            );
 
 
-        progressBar.classList.remove(
-            "error"
-        );
+            progressBar.style.width =
+                "0%";
+        }
 
 
-        progressBar.style.width =
-            "0%";
+        if (progressPercent) {
+
+            progressPercent.textContent =
+                "0%";
+        }
 
 
-        progressPercent.textContent =
-            "0%";
+        if (progressStatus) {
 
-
-        progressStatus.textContent =
-            "Preparing...";
+            progressStatus.textContent =
+                "Preparing...";
+        }
     }
 
 
 
     /*
-     * --------------------------------------
-     * UPLOAD
-     * --------------------------------------
+     * =====================================================
+     * UPLOAD ONE FILE
+     * =====================================================
+     */
+
+    function uploadOneFile(
+        file,
+        index,
+        total
+    ) {
+
+        return new Promise(
+            (
+                resolve,
+                reject
+            ) => {
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "uploaded_file",
+                    file
+                );
+
+
+                const xhr =
+                    new XMLHttpRequest();
+
+
+                const url =
+                    config.getUrl
+                        ? config.getUrl()
+                        : config.url;
+
+
+                xhr.open(
+                    "POST",
+                    url
+                );
+
+
+                xhr.withCredentials =
+                    true;
+
+
+
+                /*
+                 * Upload progress
+                 */
+
+                xhr.upload.addEventListener(
+                    "progress",
+                    event => {
+
+                        if (
+                            !event.lengthComputable
+                        ) {
+
+                            return;
+                        }
+
+
+                        const percent =
+                            Math.round(
+                                (
+                                    event.loaded /
+                                    event.total
+                                ) * 100
+                            );
+
+
+                        setProgress(
+                            percent,
+                            `File ${index + 1}/${total}: ${formatFileSize(event.loaded)} / ${formatFileSize(event.total)}`
+                        );
+                    }
+                );
+
+
+
+                /*
+                 * Complete
+                 */
+
+                xhr.addEventListener(
+                    "load",
+                    () => {
+
+                        let data = {};
+
+
+                        try {
+
+                            data =
+                                JSON.parse(
+                                    xhr.responseText
+                                );
+
+                        }
+
+                        catch {
+
+                            data = {};
+                        }
+
+
+                        if (
+                            xhr.status >= 200 &&
+                            xhr.status < 300
+                        ) {
+
+                            resolve(
+                                data
+                            );
+
+
+                            return;
+                        }
+
+
+                        reject(
+                            new Error(
+                                data.detail ||
+                                `Upload failed for ${file.name}.`
+                            )
+                        );
+                    }
+                );
+
+
+
+                /*
+                 * Network error
+                 */
+
+                xhr.addEventListener(
+                    "error",
+                    () => {
+
+                        reject(
+                            new Error(
+                                `Network error while uploading ${file.name}.`
+                            )
+                        );
+                    }
+                );
+
+
+
+                /*
+                 * Abort
+                 */
+
+                xhr.addEventListener(
+                    "abort",
+                    () => {
+
+                        reject(
+                            new Error(
+                                `Upload cancelled for ${file.name}.`
+                            )
+                        );
+                    }
+                );
+
+
+                xhr.send(
+                    formData
+                );
+            }
+        );
+    }
+
+
+
+    /*
+     * =====================================================
+     * UPLOAD ALL FILES
+     * =====================================================
      */
 
     async function upload() {
@@ -1234,13 +1932,20 @@ function createUploadController(config) {
         }
 
 
-        if (!selectedFile) {
+        if (
+            selectedFiles.length === 0
+        ) {
 
-            message.textContent =
-                "Please select a file.";
+            if (message) {
 
-            message.className =
-                "message error";
+                message.textContent =
+                    "Please select at least one file.";
+
+
+                message.className =
+                    "message error";
+            }
+
 
             return;
         }
@@ -1255,7 +1960,8 @@ function createUploadController(config) {
         }
 
 
-        uploading = true;
+        uploading =
+            true;
 
 
         zone.classList.add(
@@ -1266,202 +1972,94 @@ function createUploadController(config) {
         uploadButton.disabled =
             true;
 
-        removeButton.disabled =
-            true;
+
+        if (message) {
+
+            message.textContent =
+                "";
 
 
-        message.textContent =
-            "";
-
-        message.className =
-            "message";
+            message.className =
+                "message";
+        }
 
 
-        setProgress(
-            0,
-            "Starting upload..."
-        );
+        resetProgress();
 
 
-        const formData =
-            new FormData();
+        const filesToUpload =
+            [...selectedFiles];
 
 
-        formData.append(
-            "uploaded_file",
-            selectedFile
-        );
+        let uploadedCount =
+            0;
 
 
         try {
 
-            const result =
-                await new Promise(
-                    (resolve, reject) => {
+            for (
+                let index = 0;
+                index < filesToUpload.length;
+                index++
+            ) {
 
-                        const xhr =
-                            new XMLHttpRequest();
-
-
-                        xhr.open(
-                            "POST",
-                            config.url
-                        );
+                const file =
+                    filesToUpload[index];
 
 
-                        xhr.withCredentials =
-                            true;
-
-
-                        /*
-                         * Upload progress
-                         */
-
-                        xhr.upload.addEventListener(
-                            "progress",
-                            event => {
-
-                                if (
-                                    event.lengthComputable
-                                ) {
-
-                                    const percent =
-                                        Math.round(
-                                            (
-                                                event.loaded /
-                                                event.total
-                                            ) * 100
-                                        );
-
-
-                                    setProgress(
-                                        percent,
-                                        `Uploading ${formatFileSize(event.loaded)} / ${formatFileSize(event.total)}`
-                                    );
-                                }
-                            }
-                        );
-
-
-                        /*
-                         * Complete
-                         */
-
-                        xhr.addEventListener(
-                            "load",
-                            () => {
-
-                                let data = null;
-
-
-                                try {
-
-                                    data =
-                                        JSON.parse(
-                                            xhr.responseText
-                                        );
-
-                                }
-
-                                catch {
-
-                                    data = {};
-                                }
-
-
-                                if (
-                                    xhr.status >= 200 &&
-                                    xhr.status < 300
-                                ) {
-
-                                    resolve(data);
-
-                                    return;
-                                }
-
-
-                                reject(
-                                    new Error(
-                                        data.detail ||
-                                        "Upload failed."
-                                    )
-                                );
-                            }
-                        );
-
-
-                        /*
-                         * Network error
-                         */
-
-                        xhr.addEventListener(
-                            "error",
-                            () => {
-
-                                reject(
-                                    new Error(
-                                        "Network error during upload."
-                                    )
-                                );
-                            }
-                        );
-
-
-                        /*
-                         * Abort
-                         */
-
-                        xhr.addEventListener(
-                            "abort",
-                            () => {
-
-                                reject(
-                                    new Error(
-                                        "Upload cancelled."
-                                    )
-                                );
-                            }
-                        );
-
-
-                        xhr.send(
-                            formData
-                        );
-                    }
+                setProgress(
+                    0,
+                    `Starting file ${index + 1}/${filesToUpload.length}: ${file.name}`
                 );
 
 
-
-            /*
-             * SUCCESS
-             */
-
-            setProgress(
-                100,
-                "Upload complete"
-            );
+                await uploadOneFile(
+                    file,
+                    index,
+                    filesToUpload.length
+                );
 
 
-            progressBar.classList.add(
-                "success"
-            );
+                uploadedCount++;
 
 
-            message.textContent =
-                config.successMessage(result);
+                setProgress(
+                    100,
+                    `Uploaded ${uploadedCount}/${filesToUpload.length}: ${file.name}`
+                );
+            }
 
 
-            message.className =
-                "message success";
+            if (progressBar) {
+
+                progressBar.classList.add(
+                    "success"
+                );
+            }
 
 
-            /*
-             * Clear selected file
-             */
+            if (message) {
 
-            selectedFile = null;
+                message.textContent =
+                    config.successMessage
+                        ? config.successMessage(
+                            uploadedCount,
+                            filesToUpload
+                        )
+                        : `${uploadedCount} file${uploadedCount === 1 ? "" : "s"} uploaded successfully.`;
 
-            input.value = "";
+
+                message.className =
+                    "message success";
+            }
+
+
+            selectedFiles =
+                [];
+
+
+            input.value =
+                "";
 
 
             selected.classList.remove(
@@ -1469,29 +2067,19 @@ function createUploadController(config) {
             );
 
 
-            selectedName.textContent =
-                "";
-
-            selectedSize.textContent =
+            selected.innerHTML =
                 "";
 
 
-            /*
-             * Refresh list
-             */
-
-            if (config.afterUpload) {
+            if (
+                config.afterUpload
+            ) {
 
                 await config.afterUpload(
-                    result
+                    filesToUpload
                 );
             }
 
-
-            /*
-             * Keep success visible
-             * for a moment.
-             */
 
             setTimeout(
                 () => {
@@ -1504,33 +2092,43 @@ function createUploadController(config) {
                 },
                 1500
             );
-
         }
+
 
         catch (error) {
 
-            progressBar.classList.add(
-                "error"
-            );
+            if (progressBar) {
+
+                progressBar.classList.add(
+                    "error"
+                );
+            }
 
 
-            progressStatus.textContent =
-                "Upload failed";
+            if (progressStatus) {
+
+                progressStatus.textContent =
+                    "Upload failed";
+            }
 
 
-            message.textContent =
-                error.message ||
-                "Upload failed.";
+            if (message) {
+
+                message.textContent =
+                    error.message ||
+                    "Upload failed.";
 
 
-            message.className =
-                "message error";
+                message.className =
+                    "message error";
+            }
         }
 
 
         finally {
 
-            uploading = false;
+            uploading =
+                false;
 
 
             zone.classList.remove(
@@ -1541,37 +2139,46 @@ function createUploadController(config) {
             uploadButton.disabled =
                 false;
 
-            removeButton.disabled =
-                false;
+
+            updateSummary();
         }
     }
 
 
 
     /*
-     * --------------------------------------
+     * =====================================================
      * UPLOAD BUTTON
-     * --------------------------------------
+     * =====================================================
      */
 
     uploadButton.addEventListener(
         "click",
-        upload
+        event => {
+
+            event.stopPropagation();
+
+
+            upload();
+        }
     );
 
 
     return {
+
         upload,
-        clearFile
+
+        clearFiles
+
     };
 }
 
 
 
 /*
- * ==========================================
- * PUBLIC UPLOAD CONTROLLER
- * ==========================================
+ * =========================================================
+ * PUBLIC UPLOAD
+ * =========================================================
  */
 
 const publicUploader =
@@ -1585,15 +2192,6 @@ const publicUploader =
 
         selectedId:
             "public-selected-file",
-
-        selectedNameId:
-            "public-selected-name",
-
-        selectedSizeId:
-            "public-selected-size",
-
-        removeId:
-            "public-remove-file",
 
         buttonId:
             "public-upload-button",
@@ -1613,12 +2211,15 @@ const publicUploader =
         messageId:
             "public-message",
 
+
         url:
             "/files/upload",
 
+
         successMessage:
-            () =>
-                "File uploaded successfully.",
+            count =>
+                `${count} public file${count === 1 ? "" : "s"} uploaded successfully.`,
+
 
         afterUpload:
             async () => {
@@ -1631,9 +2232,9 @@ const publicUploader =
 
 
 /*
- * ==========================================
- * PRIVATE UPLOAD CONTROLLER
- * ==========================================
+ * =========================================================
+ * PRIVATE UPLOAD
+ * =========================================================
  */
 
 const privateUploader =
@@ -1647,15 +2248,6 @@ const privateUploader =
 
         selectedId:
             "private-selected-file",
-
-        selectedNameId:
-            "private-selected-name",
-
-        selectedSizeId:
-            "private-selected-size",
-
-        removeId:
-            "private-remove-file",
 
         buttonId:
             "private-upload-button",
@@ -1676,14 +2268,19 @@ const privateUploader =
             "private-message",
 
 
-        /*
-         * URL is created dynamically
-         * because recipient is selected
-         * from dropdown.
-         */
+        getUrl:
+            () => {
 
-        url:
-            "/files/private/upload",
+                const recipient =
+                    document.getElementById(
+                        "recipient"
+                    ).value;
+
+
+                return (
+                    `/files/private/upload?recipient_username=${encodeURIComponent(recipient)}`
+                );
+            },
 
 
         beforeUpload:
@@ -1695,19 +2292,21 @@ const privateUploader =
                     ).value;
 
 
-                const message =
-                    document.getElementById(
-                        "private-message"
-                    );
-
-
                 if (!recipient) {
 
-                    message.textContent =
+                    const privateMessage =
+                        document.getElementById(
+                            "private-message"
+                        );
+
+
+                    privateMessage.textContent =
                         "Please select a recipient.";
 
-                    message.className =
+
+                    privateMessage.className =
                         "message error";
+
 
                     return false;
                 }
@@ -1718,8 +2317,18 @@ const privateUploader =
 
 
         successMessage:
-            result =>
-                `File sent to ${result.recipient}.`,
+            count => {
+
+                const recipient =
+                    document.getElementById(
+                        "recipient"
+                    ).value;
+
+
+                return (
+                    `${count} file${count === 1 ? "" : "s"} sent to ${recipient}.`
+                );
+            },
 
 
         afterUpload:
@@ -1733,629 +2342,144 @@ const privateUploader =
 
 
 /*
- * ==========================================
- * PRIVATE UPLOAD URL OVERRIDE
- * ==========================================
- *
- * Because the recipient is dynamic,
- * we replace the upload controller's
- * normal upload flow with a small wrapper.
- *
- * ==========================================
+ * =========================================================
+ * SIDEBAR NAVIGATION
+ * =========================================================
  */
 
-document
-    .getElementById(
-        "private-upload-button"
-    )
-    .addEventListener(
-        "click",
-        async event => {
+function initializeNavigation() {
 
-            /*
-             * The controller already owns
-             * this button.
-             *
-             * This listener only exists as
-             * a placeholder for future
-             * private-upload customization.
-             *
-             * Actual upload is handled by
-             * the controller above.
-             */
-        }
-    );
+    const navItems =
+        document.querySelectorAll(
+            ".nav-item"
+        );
+
+
+    for (
+        const item of navItems
+    ) {
+
+        item.addEventListener(
+            "click",
+            event => {
+
+                const href =
+                    item.getAttribute(
+                        "href"
+                    );
+
+
+                if (
+                    !href ||
+                    !href.startsWith("#")
+                ) {
+
+                    return;
+                }
+
+
+                const target =
+                    document.querySelector(
+                        href
+                    );
+
+
+                if (!target) {
+
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                const topbar =
+                    document.querySelector(
+                        ".topbar"
+                    );
+
+
+                const offset =
+                    topbar
+                        ? topbar.offsetHeight + 20
+                        : 20;
+
+
+                const position =
+                    target.getBoundingClientRect()
+                        .top
+                    +
+                    window.scrollY
+                    -
+                    offset;
+
+
+                window.scrollTo(
+                    {
+                        top:
+                            Math.max(
+                                position,
+                                0
+                            ),
+
+                        behavior:
+                            "smooth"
+                    }
+                );
+
+
+                navItems.forEach(
+                    navItem => {
+
+                        navItem.classList.remove(
+                            "active"
+                        );
+                    }
+                );
+
+
+                item.classList.add(
+                    "active"
+                );
+
+            }
+        );
+    }
+}
 
 
 
 /*
- * ==========================================
- * IMPORTANT PRIVATE UPLOAD PATCH
- * ==========================================
- *
- * The private endpoint requires:
- *
- * ?recipient_username=username
- *
- * So we use the selected recipient
- * to construct the endpoint before
- * starting the upload.
- *
+ * =========================================================
+ * LOGOUT
+ * =========================================================
  */
 
+function initializeLogout() {
 
-/*
- * We recreate the private upload
- * controller with a dynamic URL by
- * overriding XMLHttpRequest endpoint
- * through a small standalone uploader.
- */
-
-
-/*
- * The first controller is intentionally
- * not used for the actual private upload.
- *
- * Disable its button listener by replacing
- * the button with a clone.
- */
-
-const oldPrivateButton =
-    document.getElementById(
-        "private-upload-button"
-    );
+    const logoutButton =
+        document.getElementById(
+            "logout-button"
+        );
 
 
-const newPrivateButton =
-    oldPrivateButton.cloneNode(
-        true
-    );
-
-
-oldPrivateButton.parentNode.replaceChild(
-    newPrivateButton,
-    oldPrivateButton
-);
-
-
-
-/*
- * Private uploader state
- */
-
-let privateSelectedFile = null;
-
-const privateInput =
-    document.getElementById(
-        "private-file"
-    );
-
-
-const privateZone =
-    document.getElementById(
-        "private-upload-zone"
-    );
-
-
-const privateSelected =
-    document.getElementById(
-        "private-selected-file"
-    );
-
-
-const privateSelectedName =
-    document.getElementById(
-        "private-selected-name"
-    );
-
-
-const privateSelectedSize =
-    document.getElementById(
-        "private-selected-size"
-    );
-
-
-const privateRemove =
-    document.getElementById(
-        "private-remove-file"
-    );
-
-
-const privateProgress =
-    document.getElementById(
-        "private-progress"
-    );
-
-
-const privateProgressBar =
-    document.getElementById(
-        "private-progress-bar"
-    );
-
-
-const privateProgressPercent =
-    document.getElementById(
-        "private-progress-percent"
-    );
-
-
-const privateProgressStatus =
-    document.getElementById(
-        "private-progress-status"
-    );
-
-
-const privateMessage =
-    document.getElementById(
-        "private-message"
-    );
-
-
-
-/*
- * Private file selection
- */
-
-function selectPrivateFile(file) {
-
-    if (!file) {
+    if (!logoutButton) {
 
         return;
     }
 
 
-    privateSelectedFile =
-        file;
-
-
-    privateSelectedName.textContent =
-        file.name;
-
-
-    privateSelectedSize.textContent =
-        formatFileSize(
-            file.size
-        );
-
-
-    privateSelected.classList.add(
-        "visible"
-    );
-
-
-    privateMessage.textContent =
-        "";
-
-    privateMessage.className =
-        "message";
-}
-
-
-privateInput.addEventListener(
-    "change",
-    () => {
-
-        if (
-            privateInput.files &&
-            privateInput.files.length
-        ) {
-
-            selectPrivateFile(
-                privateInput.files[0]
-            );
-        }
-    }
-);
-
-
-privateZone.addEventListener(
-    "click",
-    () => {
-
-        if (
-            !privateProgress.classList.contains(
-                "visible"
-            )
-        ) {
-
-            privateInput.click();
-        }
-    }
-);
-
-
-privateZone.addEventListener(
-    "dragover",
-    event => {
-
-        event.preventDefault();
-
-        privateZone.classList.add(
-            "dragover"
-        );
-    }
-);
-
-
-privateZone.addEventListener(
-    "dragleave",
-    event => {
-
-        event.preventDefault();
-
-        privateZone.classList.remove(
-            "dragover"
-        );
-    }
-);
-
-
-privateZone.addEventListener(
-    "drop",
-    event => {
-
-        event.preventDefault();
-
-        privateZone.classList.remove(
-            "dragover"
-        );
-
-
-        const files =
-            event.dataTransfer.files;
-
-
-        if (
-            files &&
-            files.length
-        ) {
-
-            selectPrivateFile(
-                files[0]
-            );
-        }
-    }
-);
-
-
-privateRemove.addEventListener(
-    "click",
-    event => {
-
-        event.stopPropagation();
-
-
-        privateSelectedFile =
-            null;
-
-
-        privateInput.value =
-            "";
-
-
-        privateSelected.classList.remove(
-            "visible"
-        );
-
-
-        privateSelectedName.textContent =
-            "";
-
-        privateSelectedSize.textContent =
-            "";
-    }
-);
-
-
-
-/*
- * ==========================================
- * PRIVATE UPLOAD
- * ==========================================
- */
-
-newPrivateButton.addEventListener(
-    "click",
-    async () => {
-
-        if (!privateSelectedFile) {
-
-            privateMessage.textContent =
-                "Please select a file.";
-
-            privateMessage.className =
-                "message error";
-
-            return;
-        }
-
-
-        const recipient =
-            document.getElementById(
-                "recipient"
-            ).value;
-
-
-        if (!recipient) {
-
-            privateMessage.textContent =
-                "Please select a recipient.";
-
-            privateMessage.className =
-                "message error";
-
-            return;
-        }
-
-
-        newPrivateButton.disabled =
-            true;
-
-        privateRemove.disabled =
-            true;
-
-        privateZone.classList.add(
-            "uploading"
-        );
-
-
-        privateProgress.classList.add(
-            "visible"
-        );
-
-
-        privateProgressBar.classList.remove(
-            "success",
-            "error"
-        );
-
-
-        privateProgressBar.style.width =
-            "0%";
-
-
-        privateProgressPercent.textContent =
-            "0%";
-
-
-        privateProgressStatus.textContent =
-            "Starting upload...";
-
-
-        privateMessage.textContent =
-            "";
-
-        privateMessage.className =
-            "message";
-
-
-        const formData =
-            new FormData();
-
-
-        formData.append(
-            "uploaded_file",
-            privateSelectedFile
-        );
-
-
-        const url =
-            `/files/private/upload?recipient_username=${encodeURIComponent(recipient)}`;
-
-
-        try {
-
-            await new Promise(
-                (resolve, reject) => {
-
-                    const xhr =
-                        new XMLHttpRequest();
-
-
-                    xhr.open(
-                        "POST",
-                        url
-                    );
-
-
-                    xhr.withCredentials =
-                        true;
-
-
-                    xhr.upload.addEventListener(
-                        "progress",
-                        event => {
-
-                            if (
-                                event.lengthComputable
-                            ) {
-
-                                const percent =
-                                    Math.round(
-                                        (
-                                            event.loaded /
-                                            event.total
-                                        ) * 100
-                                    );
-
-
-                                privateProgressBar.style.width =
-                                    `${percent}%`;
-
-
-                                privateProgressPercent.textContent =
-                                    `${percent}%`;
-
-
-                                privateProgressStatus.textContent =
-                                    `Uploading ${formatFileSize(event.loaded)} / ${formatFileSize(event.total)}`;
-                            }
-                        }
-                    );
-
-
-                    xhr.addEventListener(
-                        "load",
-                        async () => {
-
-                            let data = null;
-
-
-                            try {
-
-                                data =
-                                    JSON.parse(
-                                        xhr.responseText
-                                    );
-
-                            }
-
-                            catch {
-
-                                data = {};
-                            }
-
-
-                            if (
-                                xhr.status >= 200 &&
-                                xhr.status < 300
-                            ) {
-
-                                privateProgressBar.style.width =
-                                    "100%";
-
-
-                                privateProgressPercent.textContent =
-                                    "100%";
-
-
-                                privateProgressStatus.textContent =
-                                    "Upload complete";
-
-
-                                privateProgressBar.classList.add(
-                                    "success"
-                                );
-
-
-                                privateMessage.textContent =
-                                    `File sent to ${data.recipient || recipient}.`;
-
-
-                                privateMessage.className =
-                                    "message success";
-
-
-                                privateSelectedFile =
-                                    null;
-
-
-                                privateInput.value =
-                                    "";
-
-
-                                privateSelected.classList.remove(
-                                    "visible"
-                                );
-
-
-                                privateSelectedName.textContent =
-                                    "";
-
-                                privateSelectedSize.textContent =
-                                    "";
-
-
-                                await loadSentFiles();
-
-
-                                resolve();
-
-                                return;
-                            }
-
-
-                            reject(
-                                new Error(
-                                    data.detail ||
-                                    "Private upload failed."
-                                )
-                            );
-                        }
-                    );
-
-
-                    xhr.addEventListener(
-                        "error",
-                        () => {
-
-                            reject(
-                                new Error(
-                                    "Network error during upload."
-                                )
-                            );
-                        }
-                    );
-
-
-                    xhr.send(
-                        formData
-                    );
-                }
-            );
-
-        }
-
-        catch (error) {
-
-            privateProgressStatus.textContent =
-                "Upload failed";
-
-
-            privateProgressBar.classList.add(
-                "error"
-            );
-
-
-            privateMessage.textContent =
-                error.message;
-
-
-            privateMessage.className =
-                "message error";
-        }
-
-
-        finally {
-
-            newPrivateButton.disabled =
-                false;
-
-            privateRemove.disabled =
-                false;
-
-            privateZone.classList.remove(
-                "uploading"
-            );
-        }
-    }
-);
-
-
-
-/*
- * ==========================================
- * LOGOUT
- * ==========================================
- */
-
-document
-    .getElementById(
-        "logout-button"
-    )
-    .addEventListener(
+    logoutButton.addEventListener(
         "click",
         async () => {
+
+            logoutButton.disabled =
+                true;
+
+
+            logoutButton.textContent =
+                "Logging out...";
+
 
             try {
 
@@ -2363,7 +2487,8 @@ document
                     await fetch(
                         "/auth/logout",
                         {
-                            method: "POST",
+                            method:
+                                "POST",
 
                             credentials:
                                 "include"
@@ -2386,36 +2511,67 @@ document
 
             }
 
+
             catch (error) {
 
                 alert(
                     "Unable to connect to LocalDrop."
                 );
             }
+
+
+            finally {
+
+                logoutButton.disabled =
+                    false;
+
+
+                logoutButton.textContent =
+                    "Logout";
+            }
         }
     );
+}
 
 
 
 /*
- * ==========================================
- * INITIALIZE
- * ==========================================
+ * =========================================================
+ * INITIALIZE DASHBOARD
+ * =========================================================
  */
 
 async function initializeDashboard() {
 
-    await loadUser();
+    const authenticated =
+        await loadUser();
 
-    await loadPublicFiles();
 
-    await loadUsers();
+    if (!authenticated) {
 
-    await loadReceivedFiles();
+        return;
+    }
 
-    await loadSentFiles();
+
+    await Promise.all(
+        [
+
+            loadPublicFiles(),
+
+            loadUsers(),
+
+            loadReceivedFiles(),
+
+            loadSentFiles()
+
+        ]
+    );
+
+
+    initializeNavigation();
+
+    initializeLogout();
 }
 
 
 initializeDashboard();
-

@@ -11,387 +11,729 @@
     >
 
     <title>LocalDrop - Dashboard</title>
+
     <link
-    rel="stylesheet"
-    href="{{ url_for('static', path='css/dashboard.css') }}">
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}"
+    >
 
 </head>
 
-
 <body>
 
+<div class="app-shell">
 
-<header>
+    <aside class="sidebar">
 
-    <div class="logo">
-        LocalDrop
-    </div>
+        <div class="sidebar-brand">
 
+            <div class="brand-icon">
+                L
+            </div>
 
-    <div class="user-area">
+            <div>
 
-        <span id="username">
-            Loading...
-        </span>
-
-
-        <button
-            class="logout"
-            id="logout-button"
-        >
-            Logout
-        </button>
-
-    </div>
-
-</header>
-
-
-
-<main>
-
-
-    <div class="welcome">
-
-        <h1>
-            Dashboard
-        </h1>
-
-        <p>
-            Share files across your local network.
-        </p>
-
-    </div>
-
-
-
-    <div class="grid">
-
-
-        <!-- ================================= -->
-        <!-- PUBLIC FILES -->
-        <!-- ================================= -->
-
-        <section class="card">
-
-            <h2>
-                Public Files
-            </h2>
-
-
-            <div class="upload-zone"
-                 id="public-upload-zone">
-
-                <div class="upload-icon">
-                    📤
+                <div class="brand-name">
+                    LocalDrop
                 </div>
 
-                <div class="upload-title">
-                    Drop a file here
+                <div class="brand-subtitle">
+                    Local file sharing
                 </div>
 
-                <div class="upload-subtitle">
-                    or click to browse
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="#dashboard"
+                class="nav-item active"
+            >
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a
+                href="#public"
+                class="nav-item"
+            >
+                <span class="nav-icon">📁</span>
+                <span>Public Files</span>
+            </a>
+
+
+            <a
+                href="#private"
+                class="nav-item"
+            >
+                <span class="nav-icon">🔒</span>
+                <span>Private Files</span>
+            </a>
+
+
+            <a
+                href="#upload"
+                class="nav-item"
+            >
+                <span class="nav-icon">↑</span>
+                <span>Upload</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="network-status">
+
+                <span class="status-dot"></span>
+
+                <div>
+
+                    <div class="status-title">
+                        Local network
+                    </div>
+
+                    <div class="status-subtitle">
+                        Connected
+                    </div>
+
                 </div>
 
-                <input
-                    type="file"
-                    id="public-file"
-                    class="hidden-file-input"
-                >
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <div class="main-area">
+
+        <header class="topbar">
+
+            <div class="mobile-brand">
+
+                <div class="brand-icon">
+                    L
+                </div>
+
+                <span>
+                    LocalDrop
+                </span>
 
             </div>
 
 
-            <div
-                class="selected-file"
-                id="public-selected-file"
-            >
+            <div class="topbar-spacer"></div>
 
-                <div class="selected-file-info">
 
-                    <div
-                        class="selected-file-name"
-                        id="public-selected-name"
-                    ></div>
+            <div class="user-area">
 
-                    <div
-                        class="selected-file-size"
-                        id="public-selected-size"
-                    ></div>
+                <div class="user-avatar">
+                    <span id="user-avatar-letter">U</span>
+                </div>
+
+
+                <div class="user-info">
+
+                    <span
+                        id="username"
+                        class="username"
+                    >
+                        Loading...
+                    </span>
+
+                    <span class="user-role">
+                        Local user
+                    </span>
 
                 </div>
 
 
                 <button
+                    class="logout"
+                    id="logout-button"
                     type="button"
-                    class="remove-file"
-                    id="public-remove-file"
                 >
-                    Remove
+                    Logout
                 </button>
 
             </div>
 
-
-            <button
-                class="upload-button"
-                id="public-upload-button"
-            >
-                Upload Public File
-            </button>
+        </header>
 
 
-            <div
-                class="upload-progress"
-                id="public-progress"
+        <main class="content">
+
+            <section
+                class="page-header"
+                id="dashboard"
             >
 
-                <div class="progress-header">
+                <div>
 
-                    <span
-                        class="progress-status"
-                        id="public-progress-status"
-                    >
-                        Preparing...
+                    <span class="eyebrow">
+                        LOCALDROP
                     </span>
 
-                    <span
-                        class="progress-percent"
-                        id="public-progress-percent"
+                    <h1>
+                        Dashboard
+                    </h1>
+
+                    <p>
+                        Share files securely across your local network.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        📁
+                    </div>
+
+                    <div>
+
+                        <span class="stat-label">
+                            Public files
+                        </span>
+
+                        <strong
+                            id="public-file-count"
+                            class="stat-value"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ↑
+                    </div>
+
+                    <div>
+
+                        <span class="stat-label">
+                            Sent files
+                        </span>
+
+                        <strong
+                            id="sent-file-count"
+                            class="stat-value"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ↓
+                    </div>
+
+                    <div>
+
+                        <span class="stat-label">
+                            Received files
+                        </span>
+
+                        <strong
+                            id="received-file-count"
+                            class="stat-value"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="section"
+                id="upload"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            FILE SHARING
+                        </span>
+
+                        <h2>
+                            Upload files
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="upload-grid">
+
+
+                    <section
+                        class="card"
+                        id="public"
                     >
-                        0%
-                    </span>
 
-                </div>
+                        <div class="card-header">
 
+                            <div>
 
-                <div class="progress-track">
+                                <div class="card-icon public-icon">
+                                    📁
+                                </div>
 
-                    <div
-                        class="progress-bar"
-                        id="public-progress-bar"
-                    ></div>
+                                <h3>
+                                    Public files
+                                </h3>
 
-                </div>
+                                <p>
+                                    Available to users on your LocalDrop network.
+                                </p>
 
-            </div>
+                            </div>
 
-
-            <div
-                class="message"
-                id="public-message"
-            ></div>
+                        </div>
 
 
+                        <div
+                            class="upload-zone"
+                            id="public-upload-zone"
+                        >
 
-            <div
-                class="file-list"
-                id="public-files"
-            >
+                            <div class="upload-icon">
+                                ↑
+                            </div>
 
-                <div class="loading">
-                    Loading...
-                </div>
+                            <div class="upload-title">
+                                Drop files here
+                            </div>
 
-            </div>
+                            <div class="upload-subtitle">
+                                or click to browse
+                            </div>
 
-        </section>
+                            <input
+                                type="file"
+                                id="public-file"
+                                multiple
+                            >
 
-
-
-        <!-- ================================= -->
-        <!-- PRIVATE FILES -->
-        <!-- ================================= -->
-
-        <section class="card">
-
-            <h2>
-                Private Files
-            </h2>
-
-
-            <p>
-                Send files directly to another LocalDrop user.
-            </p>
+                        </div>
 
 
+                        <div
+                            class="selected-file"
+                            id="public-selected-file"
+                        >
 
-            <h3>
-                Send File
-            </h3>
+                            <div class="selected-file-info">
 
+                                <div
+                                    class="selected-file-name"
+                                    id="public-selected-name"
+                                ></div>
 
-            <select id="recipient">
+                                <div
+                                    class="selected-file-size"
+                                    id="public-selected-size"
+                                ></div>
 
-                <option value="">
-                    Loading users...
-                </option>
-
-            </select>
-
-
-            <div class="upload-zone"
-                 id="private-upload-zone">
-
-                <div class="upload-icon">
-                    🔒
-                </div>
-
-                <div class="upload-title">
-                    Drop a file here
-                </div>
-
-                <div class="upload-subtitle">
-                    or click to browse
-                </div>
-
-                <input
-                    type="file"
-                    id="private-file"
-                    class="hidden-file-input"
-                >
-
-            </div>
+                            </div>
 
 
-            <div
-                class="selected-file"
-                id="private-selected-file"
-            >
+                            <button
+                                type="button"
+                                class="remove-file"
+                                id="public-remove-file"
+                            >
+                                Remove
+                            </button>
 
-                <div class="selected-file-info">
-
-                    <div
-                        class="selected-file-name"
-                        id="private-selected-name"
-                    ></div>
-
-                    <div
-                        class="selected-file-size"
-                        id="private-selected-size"
-                    ></div>
-
-                </div>
+                        </div>
 
 
-                <button
-                    type="button"
-                    class="remove-file"
-                    id="private-remove-file"
-                >
-                    Remove
-                </button>
-
-            </div>
+                        <button
+                            type="button"
+                            class="upload-button"
+                            id="public-upload-button"
+                        >
+                            Upload public files
+                        </button>
 
 
-            <button
-                class="upload-button"
-                id="private-upload-button"
-            >
-                Send Private File
-            </button>
+                        <div
+                            class="upload-progress"
+                            id="public-progress"
+                        >
+
+                            <div class="progress-header">
+
+                                <span
+                                    class="progress-status"
+                                    id="public-progress-status"
+                                >
+                                    Preparing...
+                                </span>
+
+                                <span
+                                    class="progress-percent"
+                                    id="public-progress-percent"
+                                >
+                                    0%
+                                </span>
+
+                            </div>
 
 
-            <div
-                class="upload-progress"
-                id="private-progress"
-            >
+                            <div class="progress-track">
 
-                <div class="progress-header">
+                                <div
+                                    class="progress-bar"
+                                    id="public-progress-bar"
+                                ></div>
 
-                    <span
-                        class="progress-status"
-                        id="private-progress-status"
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="message"
+                            id="public-message"
+                        ></div>
+
+                    </section>
+
+
+                    <section
+                        class="card"
+                        id="private"
                     >
-                        Preparing...
-                    </span>
 
-                    <span
-                        class="progress-percent"
-                        id="private-progress-percent"
-                    >
-                        0%
-                    </span>
+                        <div class="card-header">
+
+                            <div>
+
+                                <div class="card-icon private-icon">
+                                    🔒
+                                </div>
+
+                                <h3>
+                                    Private files
+                                </h3>
+
+                                <p>
+                                    Send files directly to another LocalDrop user.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="recipient-field">
+
+                            <label for="recipient">
+                                Recipient
+                            </label>
+
+                            <select id="recipient">
+
+                                <option value="">
+                                    Loading users...
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div
+                            class="upload-zone"
+                            id="private-upload-zone"
+                        >
+
+                            <div class="upload-icon">
+                                🔒
+                            </div>
+
+                            <div class="upload-title">
+                                Drop files here
+                            </div>
+
+                            <div class="upload-subtitle">
+                                or click to browse
+                            </div>
+
+                            <input
+                                type="file"
+                                id="private-file"
+                                multiple
+                            >
+
+                        </div>
+
+
+                        <div
+                            class="selected-file"
+                            id="private-selected-file"
+                        >
+
+                            <div class="selected-file-info">
+
+                                <div
+                                    class="selected-file-name"
+                                    id="private-selected-name"
+                                ></div>
+
+                                <div
+                                    class="selected-file-size"
+                                    id="private-selected-size"
+                                ></div>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="remove-file"
+                                id="private-remove-file"
+                            >
+                                Remove
+                            </button>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="upload-button"
+                            id="private-upload-button"
+                        >
+                            Send private files
+                        </button>
+
+
+                        <div
+                            class="upload-progress"
+                            id="private-progress"
+                        >
+
+                            <div class="progress-header">
+
+                                <span
+                                    class="progress-status"
+                                    id="private-progress-status"
+                                >
+                                    Preparing...
+                                </span>
+
+                                <span
+                                    class="progress-percent"
+                                    id="private-progress-percent"
+                                >
+                                    0%
+                                </span>
+
+                            </div>
+
+
+                            <div class="progress-track">
+
+                                <div
+                                    class="progress-bar"
+                                    id="private-progress-bar"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="message"
+                            id="private-message"
+                        ></div>
+
+                    </section>
+
+                </div>
+
+            </section>
+
+
+            <section class="section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            SHARED
+                        </span>
+
+                        <h2>
+                            Public files
+                        </h2>
+
+                        <p>
+                            Files available to everyone on the local network.
+                        </p>
+
+                    </div>
 
                 </div>
 
 
-                <div class="progress-track">
+                <section class="card file-card">
 
                     <div
-                        class="progress-bar"
-                        id="private-progress-bar"
-                    ></div>
+                        class="file-list"
+                        id="public-files"
+                    >
+
+                        <div class="loading">
+                            Loading...
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+
+            <section class="section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            PRIVATE
+                        </span>
+
+                        <h2>
+                            Private files
+                        </h2>
+
+                        <p>
+                            Files you have sent and received privately.
+                        </p>
+
+                    </div>
 
                 </div>
 
-            </div>
+
+                <div class="private-files-grid">
 
 
-            <div
-                class="message"
-                id="private-message"
-            ></div>
+                    <section class="card file-card">
+
+                        <div class="file-card-header">
+
+                            <div>
+
+                                <h3>
+                                    Received
+                                </h3>
+
+                                <p>
+                                    Files sent to you.
+                                </p>
+
+                            </div>
+
+                        </div>
 
 
+                        <div
+                            class="file-list"
+                            id="received-files"
+                        >
 
-            <hr class="section-divider">
+                            <div class="loading">
+                                Loading...
+                            </div>
+
+                        </div>
+
+                    </section>
 
 
+                    <section class="card file-card">
 
-            <h3>
-                Received Files
-            </h3>
+                        <div class="file-card-header">
+
+                            <div>
+
+                                <h3>
+                                    Sent
+                                </h3>
+
+                                <p>
+                                    Files you sent to others.
+                                </p>
+
+                            </div>
+
+                        </div>
 
 
-            <div
-                class="file-list"
-                id="received-files"
-            >
+                        <div
+                            class="file-list"
+                            id="sent-files"
+                        >
 
-                <div class="loading">
-                    Loading...
+                            <div class="loading">
+                                Loading...
+                            </div>
+
+                        </div>
+
+                    </section>
+
                 </div>
 
-            </div>
+            </section>
 
-
-
-            <hr class="section-divider">
-
-
-
-            <h3>
-                Sent Files
-            </h3>
-
-
-            <div
-                class="file-list"
-                id="sent-files"
-            >
-
-                <div class="loading">
-                    Loading...
-                </div>
-
-            </div>
-
-        </section>
+        </main>
 
     </div>
 
-</main>
-
+</div>
 
 
 <script
     src="{{ url_for('static', path='js/dashboard.js') }}"
     defer
 ></script>
-
 
 </body>
 
