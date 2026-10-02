@@ -1,5 +1,11 @@
-from fastapi import FastAPI
+from pathlib import Path
+import sys
+
+from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 from app.api.auth import router as auth_router
 from app.api.files import router as files_router
 from app.database.database import Base, engine
@@ -7,13 +13,20 @@ from app.models.file import File
 from app.models.session import Session
 from app.models.user import User
 from app.models.file_recipient import FileRecipient
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-templates = Jinja2Templates(directory="app/templates")
-from fastapi import Depends
 from app.auth.dependencies import get_current_user
-from app.models.user import User
+
+
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+STATIC_DIR = BASE_DIR / "app" / "static"
+TEMPLATES_DIR = BASE_DIR / "app" / "templates"
+
+
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,13 +37,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
 app.mount(
     "/static",
-    StaticFiles(directory="app/static"),
+    StaticFiles(directory=str(STATIC_DIR)),
     name="static",
 )
 
-templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(auth_router)
 app.include_router(files_router)
@@ -43,6 +56,8 @@ def root(request: Request):
         name="login.html",
         context={},
     )
+
+
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(
     request: Request,
@@ -55,6 +70,8 @@ def dashboard(
             "username": current_user.username,
         },
     )
+
+
 @app.get("/register", response_class=HTMLResponse)
 def register_page(request: Request):
     return templates.TemplateResponse(
