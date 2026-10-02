@@ -1,5 +1,4 @@
-from pathlib import Path
-import sys
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
@@ -8,25 +7,37 @@ from fastapi.templating import Jinja2Templates
 
 from app.api.auth import router as auth_router
 from app.api.files import router as files_router
+from app.auth.dependencies import get_current_user
+from app.config import (
+    APP_VERSION,
+    STATIC_DIR,
+    TEMPLATES_DIR,
+)
 from app.database.database import Base, engine
+from app.discovery import discovery
 from app.models.file import File
 from app.models.session import Session
 from app.models.user import User
 from app.models.file_recipient import FileRecipient
-from app.auth.dependencies import get_current_user
+import asyncio
 
 
-if getattr(sys, "frozen", False):
-    BASE_DIR = Path(sys._MEIPASS)
-else:
-    BASE_DIR = Path(__file__).resolve().parent.parent
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await asyncio.to_thread(
+        discovery.start
+    )
 
+    yield
 
-STATIC_DIR = BASE_DIR / "app" / "static"
-TEMPLATES_DIR = BASE_DIR / "app" / "templates"
+    await asyncio.to_thread(
+        discovery.stop
+    )
 
+templates = Jinja2Templates(
+    directory=str(TEMPLATES_DIR)
+)
 
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 Base.metadata.create_all(bind=engine)
 
@@ -34,7 +45,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="LocalDrop",
     description="Local network file sharing made simple.",
-    version="0.1.0",
+    version=APP_VERSION,
+    lifespan=lifespan,
 )
 
 

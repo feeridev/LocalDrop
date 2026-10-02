@@ -12,7 +12,7 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
+from app.config import PUBLIC_STORAGE, PRIVATE_STORAGE
 from app.auth.dependencies import get_current_user
 from app.database.database import get_db
 from app.models.file import File
@@ -25,20 +25,6 @@ router = APIRouter(
     tags=["Files"],
 )
 
-
-PUBLIC_STORAGE = Path("data/public")
-PRIVATE_STORAGE = Path("data/private")
-
-
-PUBLIC_STORAGE.mkdir(
-    parents=True,
-    exist_ok=True,
-)
-
-PRIVATE_STORAGE.mkdir(
-    parents=True,
-    exist_ok=True,
-)
 
 
 # --------------------------------------------------

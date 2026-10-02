@@ -24,6 +24,9 @@ starlette==1.6.0
 typing-inspection==0.4.4
 typing_extensions==4.16.0
 uvicorn==0.53.0
-uvloop==0.22.1
+
 watchfiles==1.2.0
 websockets==17.1
+uvloop==0.22.1; sys_platform != "win32"
+pywin32==312; sys_platform == "win32"
+zeroconf==0.151.5
