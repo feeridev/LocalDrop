@@ -84,6 +84,11 @@ with open(
         f"BASE_DIR={BASE_DIR}\n"
     )
 
+
+    # -----------------------------------------------------
+    # Direct SQLite test
+    # -----------------------------------------------------
+
     import sqlite3
 
     try:
@@ -107,6 +112,42 @@ with open(
 
         debug_file.write(
             f"SQLITE_DIRECT=ERROR: "
+            f"{type(exc).__name__}: {exc}\n"
+        )
+
+
+    # -----------------------------------------------------
+    # Direct SQLAlchemy test
+    # -----------------------------------------------------
+
+    try:
+        from sqlalchemy import create_engine
+
+        test_url = (
+            f"sqlite:///{DATABASE_PATH.as_posix()}"
+        )
+
+        test_engine = create_engine(
+            test_url,
+            connect_args={
+                "check_same_thread": False
+            },
+        )
+
+        connection = test_engine.connect()
+
+        connection.close()
+
+        test_engine.dispose()
+
+        debug_file.write(
+            "SQLALCHEMY_DIRECT=OK\n"
+        )
+
+    except Exception as exc:
+
+        debug_file.write(
+            f"SQLALCHEMY_DIRECT=ERROR: "
             f"{type(exc).__name__}: {exc}\n"
         )
 
