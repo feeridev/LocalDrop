@@ -1,22 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-from PyInstaller.utils.hooks import collect_data_files
+from pathlib import Path
 
 
-datas = []
+PROJECT_ROOT = Path(__file__).resolve().parent
 
-datas += collect_data_files(
-    "app",
-    includes=[
-        "templates/**/*",
-        "static/**/*",
-    ],
-)
+
+datas = [
+    (
+        str(PROJECT_ROOT / "app" / "static"),
+        "app/static",
+    ),
+    (
+        str(PROJECT_ROOT / "app" / "templates"),
+        "app/templates",
+    ),
+]
 
 
 a = Analysis(
     ["run.py"],
-    pathex=[],
+    pathex=[str(PROJECT_ROOT)],
     binaries=[],
     datas=datas,
     hiddenimports=[
@@ -51,7 +55,6 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
