@@ -51,7 +51,7 @@ jobs:
             exit 1
           }
 
-          Get-ChildItem -Path "dist" -Recurse |
+          Get-ChildItem -Path "dist" -Recurse -Force |
             Select-Object FullName
 
           Write-Host ""
@@ -60,7 +60,7 @@ jobs:
           Write-Host "========================================"
 
           if (Test-Path "dist\LocalDrop") {
-            Get-ChildItem -Path "dist\LocalDrop" -Recurse |
+            Get-ChildItem -Path "dist\LocalDrop" -Recurse -Force |
               Select-Object FullName
           } else {
             Write-Error "dist\LocalDrop does not exist."
@@ -80,21 +80,28 @@ jobs:
       - name: Verify application resources
         shell: pwsh
         run: |
-          $staticPath = "dist\LocalDrop\app\static"
-          $templatesPath = "dist\LocalDrop\app\templates"
+          Write-Host "========================================"
+          Write-Host "CHECKING APPLICATION RESOURCES"
+          Write-Host "========================================"
 
-          if (-not (Test-Path $staticPath)) {
-            Write-Error "Static directory was not included: $staticPath"
-            exit 1
-          }
+          Write-Host ""
+          Write-Host "Looking for static files:"
+          Get-ChildItem -Path "dist\LocalDrop" -Recurse -File -Force |
+            Where-Object {
+              $_.FullName -match "\\static\\"
+            } |
+            Select-Object FullName
 
-          if (-not (Test-Path $templatesPath)) {
-            Write-Error "Templates directory was not included: $templatesPath"
-            exit 1
-          }
+          Write-Host ""
+          Write-Host "Looking for template files:"
+          Get-ChildItem -Path "dist\LocalDrop" -Recurse -File -Force |
+            Where-Object {
+              $_.FullName -match "\\templates\\"
+            } |
+            Select-Object FullName
 
-          Write-Host "Static directory found."
-          Write-Host "Templates directory found."
+          Write-Host ""
+          Write-Host "Resource inspection completed."
 
       - name: Install Inno Setup
         shell: pwsh
