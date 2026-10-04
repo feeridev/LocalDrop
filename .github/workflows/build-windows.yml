@@ -9,40 +9,88 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      - name: Show Python version
-        run: python --version
+      - name: Show environment
+        shell: pwsh
+        run: |
+          python --version
+          python -m pip --version
+          python -m PyInstaller --version
 
       - name: Install dependencies
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
 
       - name: Build executable
+        shell: pwsh
         run: |
-          python -m PyInstaller --clean LocalDrop.spec
+          python -m PyInstaller --clean --noconfirm LocalDrop.spec
 
-      - name: Check build output
+      - name: Inspect build output
+        shell: pwsh
+        run: |
+          Write-Host "========================================"
+          Write-Host "DIST DIRECTORY"
+          Write-Host "========================================"
+
+          if (-not (Test-Path "dist")) {
+            Write-Error "dist directory does not exist."
+            exit 1
+          }
+
+          Get-ChildItem -Path "dist" -Recurse |
+            Select-Object FullName
+
+          Write-Host ""
+          Write-Host "========================================"
+          Write-Host "LOCALDROP DIRECTORY"
+          Write-Host "========================================"
+
+          if (Test-Path "dist\LocalDrop") {
+            Get-ChildItem -Path "dist\LocalDrop" -Recurse |
+              Select-Object FullName
+          } else {
+            Write-Error "dist\LocalDrop does not exist."
+            exit 1
+          }
+
+      - name: Verify executable
         shell: pwsh
         run: |
           if (-not (Test-Path "dist\LocalDrop\LocalDrop.exe")) {
             Write-Error "LocalDrop.exe was not created."
+            exit 1
           }
 
-          if (-not (Test-Path "dist\LocalDrop\app\static")) {
-            Write-Error "Static directory was not included."
+          Write-Host "LocalDrop.exe found."
+
+      - name: Verify application resources
+        shell: pwsh
+        run: |
+          $staticPath = "dist\LocalDrop\app\static"
+          $templatesPath = "dist\LocalDrop\app\templates"
+
+          if (-not (Test-Path $staticPath)) {
+            Write-Error "Static directory was not included: $staticPath"
+            exit 1
           }
 
-          if (-not (Test-Path "dist\LocalDrop\app\templates")) {
-            Write-Error "Templates directory was not included."
+          if (-not (Test-Path $templatesPath)) {
+            Write-Error "Templates directory was not included: $templatesPath"
+            exit 1
           }
+
+          Write-Host "Static directory found."
+          Write-Host "Templates directory found."
 
       - name: Install Inno Setup
         shell: pwsh
@@ -52,14 +100,30 @@ jobs:
       - name: Build installer
         shell: pwsh
         run: |
-          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "installer\LocalDrop.iss"
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
 
-      - name: Check installer
+          if (-not (Test-Path $iscc)) {
+            Write-Error "Inno Setup compiler was not found: $iscc"
+            exit 1
+          }
+
+          & $iscc "installer\LocalDrop.iss"
+
+      - name: Verify installer
         shell: pwsh
         run: |
-          if (-not (Test-Path "installer-output\LocalDrop-Setup.exe")) {
-            Write-Error "Installer was not created."
+          $installer = "installer-output\LocalDrop-Setup.exe"
+
+          if (-not (Test-Path $installer)) {
+            Write-Error "Installer was not created: $installer"
+            exit 1
           }
+
+          $size = (Get-Item $installer).Length
+
+          Write-Host "Installer created successfully."
+          Write-Host "Path: $installer"
+          Write-Host "Size: $size bytes"
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
