@@ -130,3 +130,8 @@ jobs:
         with:
           name: LocalDrop-Windows-Installer
           path: installer-output/LocalDrop-Setup.exe
+      - name: Show environment
+        shell: pwsh
+        run: |
+          python --version
+          python -m pip --version
