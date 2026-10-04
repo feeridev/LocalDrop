@@ -43,6 +43,19 @@ else:
 
 DATABASE_PATH = DATA_ROOT / "localdrop.db"
 
+with open(
+    Path(os.getenv("PROGRAMDATA", Path.home())) / "LocalDrop" / "config-debug.txt",
+    "w",
+    encoding="utf-8",
+) as debug_file:
+    debug_file.write(f"FROZEN={getattr(sys, 'frozen', False)}\n")
+    debug_file.write(f"MEIPASS={getattr(sys, '_MEIPASS', None)}\n")
+    debug_file.write(f"DATA_ROOT={DATA_ROOT}\n")
+    debug_file.write(f"DATABASE_PATH={DATABASE_PATH}\n")
+    debug_file.write(f"PROGRAMDATA={os.getenv('PROGRAMDATA')}\n")
+    debug_file.write(f"LOCALDROP_DATA_DIR={os.getenv('LOCALDROP_DATA_DIR')}\n")
+    debug_file.write(f"BASE_DIR={BASE_DIR}\n")
+
 PUBLIC_STORAGE = DATA_ROOT / "public"
 PRIVATE_STORAGE = DATA_ROOT / "private"
 
