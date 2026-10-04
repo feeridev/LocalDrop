@@ -43,125 +43,8 @@ else:
 
 DATABASE_PATH = DATA_ROOT / "localdrop.db"
 
-
-# ---------------------------------------------------------
-# Temporary runtime debug
-# ---------------------------------------------------------
-
-with open(
-    Path(os.getenv("PROGRAMDATA", Path.home()))
-    / "LocalDrop"
-    / "config-debug.txt",
-    "w",
-    encoding="utf-8",
-) as debug_file:
-
-    debug_file.write(
-        f"FROZEN={getattr(sys, 'frozen', False)}\n"
-    )
-
-    debug_file.write(
-        f"MEIPASS={getattr(sys, '_MEIPASS', None)}\n"
-    )
-
-    debug_file.write(
-        f"DATA_ROOT={DATA_ROOT}\n"
-    )
-
-    debug_file.write(
-        f"DATABASE_PATH={DATABASE_PATH}\n"
-    )
-
-    debug_file.write(
-        f"PROGRAMDATA={os.getenv('PROGRAMDATA')}\n"
-    )
-
-    debug_file.write(
-        f"LOCALDROP_DATA_DIR={os.getenv('LOCALDROP_DATA_DIR')}\n"
-    )
-
-    debug_file.write(
-        f"BASE_DIR={BASE_DIR}\n"
-    )
-
-
-    # -----------------------------------------------------
-    # Direct SQLite test
-    # -----------------------------------------------------
-
-    import sqlite3
-
-    try:
-        test_db = DATA_ROOT / "sqlite-test.db"
-
-        connection = sqlite3.connect(
-            test_db
-        )
-
-        connection.execute(
-            "CREATE TABLE IF NOT EXISTS test (id INTEGER)"
-        )
-
-        connection.close()
-
-        debug_file.write(
-            "SQLITE_DIRECT=OK\n"
-        )
-
-    except Exception as exc:
-
-        debug_file.write(
-            f"SQLITE_DIRECT=ERROR: "
-            f"{type(exc).__name__}: {exc}\n"
-        )
-
-
-    # -----------------------------------------------------
-    # Direct SQLAlchemy test
-    # -----------------------------------------------------
-
-    try:
-        from sqlalchemy import create_engine
-
-        test_url = (
-            f"sqlite:///{DATABASE_PATH.as_posix()}"
-        )
-
-        test_engine = create_engine(
-            test_url,
-            connect_args={
-                "check_same_thread": False
-            },
-        )
-
-        connection = test_engine.connect()
-
-        connection.close()
-
-        test_engine.dispose()
-
-        debug_file.write(
-            "SQLALCHEMY_DIRECT=OK\n"
-        )
-
-    except Exception as exc:
-
-        debug_file.write(
-            f"SQLALCHEMY_DIRECT=ERROR: "
-            f"{type(exc).__name__}: {exc}\n"
-        )
-
-
 PUBLIC_STORAGE = DATA_ROOT / "public"
 PRIVATE_STORAGE = DATA_ROOT / "private"
-
-
-# ---------------------------------------------------------
-# Bundled application resources
-# ---------------------------------------------------------
-
-STATIC_DIR = BASE_DIR / "app" / "static"
-TEMPLATES_DIR = BASE_DIR / "app" / "templates"
 
 
 # ---------------------------------------------------------
@@ -182,3 +65,11 @@ PRIVATE_STORAGE.mkdir(
     parents=True,
     exist_ok=True,
 )
+
+
+# ---------------------------------------------------------
+# Bundled application resources
+# ---------------------------------------------------------
+
+STATIC_DIR = BASE_DIR / "app" / "static"
+TEMPLATES_DIR = BASE_DIR / "app" / "templates"
