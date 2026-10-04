@@ -21,7 +21,6 @@ jobs:
         run: |
           python --version
           python -m pip --version
-          python -m PyInstaller --version
 
       - name: Install dependencies
         shell: pwsh
@@ -29,6 +28,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pyinstaller
+
+      - name: Verify PyInstaller
+        shell: pwsh
+        run: |
+          python -m PyInstaller --version
 
       - name: Build executable
         shell: pwsh
@@ -130,8 +134,3 @@ jobs:
         with:
           name: LocalDrop-Windows-Installer
           path: installer-output/LocalDrop-Setup.exe
-      - name: Show environment
-        shell: pwsh
-        run: |
-          python --version
-          python -m pip --version
