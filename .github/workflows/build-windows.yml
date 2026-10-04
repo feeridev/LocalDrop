@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Show environment
+      - name: Show Python version
         shell: pwsh
         run: |
           python --version
