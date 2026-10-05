@@ -3,7 +3,13 @@
 #define MyAppPublisher "Farshad"
 #define MyAppExeName "LocalDrop.exe"
 
+#ifndef BuildDir
+  #define BuildDir "..\dist\LocalDrop"
+#endif
+
+
 [Setup]
+
 AppId={{8A6D5B1C-4D2E-4A9E-B8F2-LOCALDROP2026}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
@@ -15,6 +21,8 @@ DefaultGroupName=LocalDrop
 OutputDir=..\installer-output
 OutputBaseFilename=LocalDrop-Setup
 
+SetupIconFile=..\ldrop.ico
+
 Compression=lzma
 SolidCompression=yes
 
@@ -23,14 +31,18 @@ ArchitecturesInstallIn64BitMode=x64
 
 DisableProgramGroupPage=yes
 
-UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayIcon={app}\ldrop.ico
 
 
 [Files]
 
-Source: "..\dist\LocalDrop\*"; \
+Source: "{#BuildDir}\*"; \
     DestDir: "{app}"; \
     Flags: ignoreversion recursesubdirs createallsubdirs
+
+Source: "..\ldrop.ico"; \
+    DestDir: "{app}"; \
+    Flags: ignoreversion
 
 
 [Dirs]
@@ -48,10 +60,12 @@ Name: "{commonappdata}\LocalDrop\private"; \
 [Icons]
 
 Name: "{autodesktop}\LocalDrop"; \
-    Filename: "{app}\{#MyAppExeName}"
+    Filename: "{app}\{#MyAppExeName}"; \
+    IconFilename: "{app}\ldrop.ico"
 
 Name: "{group}\LocalDrop"; \
-    Filename: "{app}\{#MyAppExeName}"
+    Filename: "{app}\{#MyAppExeName}"; \
+    IconFilename: "{app}\ldrop.ico"
 
 
 [Registry]

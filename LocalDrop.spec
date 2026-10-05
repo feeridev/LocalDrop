@@ -1,3 +1,4 @@
+
 # -*- mode: python ; coding: utf-8 -*-
 
 from pathlib import Path
@@ -24,6 +25,23 @@ a = Analysis(
     binaries=[],
     datas=datas,
     hiddenimports=[
+        "app",
+        "app.config",
+        "app.main",
+        "app.discovery",
+        "app.api",
+        "app.api.auth",
+        "app.api.files",
+        "app.auth",
+        "app.auth.dependencies",
+        "app.auth.password",
+        "app.database",
+        "app.database.database",
+        "app.models",
+        "app.models.file",
+        "app.models.file_recipient",
+        "app.models.session",
+        "app.models.user",
         "zeroconf",
         "zeroconf._core",
         "zeroconf._services.info",
@@ -55,7 +73,8 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
+    icon=str(PROJECT_ROOT / "ldrop.ico"),
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
@@ -73,3 +92,4 @@ coll = COLLECT(
     upx_exclude=[],
     name="LocalDrop",
 )
+

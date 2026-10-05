@@ -38,6 +38,13 @@ htmlcov/
 *.log
 logs/
 
+# PyInstaller
+build/
+dist/
+
+# Inno Setup
+installer-output/
+
 # OS files
 .DS_Store
-Thumbs.dbgit status
+Thumbs.db

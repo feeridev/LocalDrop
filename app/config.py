@@ -1,3 +1,4 @@
+
 from pathlib import Path
 import os
 import sys
@@ -25,18 +26,30 @@ else:
 # ---------------------------------------------------------
 
 if os.name == "nt":
+
+    default_data_root = (
+        Path(
+            os.environ.get(
+                "PROGRAMDATA",
+                r"C:\ProgramData",
+            )
+        )
+        / APP_NAME
+    )
+
     DATA_ROOT = Path(
-        os.getenv(
+        os.environ.get(
             "LOCALDROP_DATA_DIR",
-            Path(os.getenv("PROGRAMDATA", Path.home()))
-            / APP_NAME,
+            str(default_data_root),
         )
     )
+
 else:
+
     DATA_ROOT = Path(
-        os.getenv(
+        os.environ.get(
             "LOCALDROP_DATA_DIR",
-            BASE_DIR / "data",
+            str(BASE_DIR / "data"),
         )
     )
 
@@ -73,3 +86,4 @@ PRIVATE_STORAGE.mkdir(
 
 STATIC_DIR = BASE_DIR / "app" / "static"
 TEMPLATES_DIR = BASE_DIR / "app" / "templates"
+

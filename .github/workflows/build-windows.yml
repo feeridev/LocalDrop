@@ -22,6 +22,28 @@ jobs:
           python --version
           python -m pip --version
 
+      - name: Verify project files
+        shell: pwsh
+        run: |
+          Write-Host "Checking required project files..."
+
+          $required = @(
+            "requirements.txt",
+            "LocalDrop.spec",
+            "run.py",
+            "ldrop.ico",
+            "installer\LocalDrop.iss"
+          )
+
+          foreach ($file in $required) {
+            if (-not (Test-Path $file)) {
+              Write-Error "Required file not found: $file"
+              exit 1
+            }
+
+            Write-Host "OK: $file"
+          }
+
       - name: Install dependencies
         shell: pwsh
         run: |
@@ -119,6 +141,11 @@ jobs:
           }
 
           & $iscc "installer\LocalDrop.iss"
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Inno Setup compilation failed."
+            exit 1
+          }
 
       - name: Verify installer
         shell: pwsh
