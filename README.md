@@ -1,5 +1,7 @@
 # LocalDrop 📦
 
+<img width="255" height="255" alt="Untitled design" src="https://github.com/user-attachments/assets/41f9eac2-7906-4ad5-a668-767b90275d99" />
+
 A simple file sharing app for your local network.
 
 LocalDrop is a web-based file sharing application built with **Python and FastAPI**.
@@ -7,6 +9,8 @@ LocalDrop is a web-based file sharing application built with **Python and FastAP
 The idea is simple: if computers are already connected to the same local network, why should you need cloud storage, messaging apps, or USB drives just to move a file from one machine to another?
 
 LocalDrop is built around that idea.
+
+
 
 ---
 
