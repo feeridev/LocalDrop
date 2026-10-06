@@ -2,11 +2,37 @@
 
 A simple file sharing app for your local network.
 
-LocalDrop is a small web-based file sharing application built with **Python and FastAPI**.
+LocalDrop is a web-based file sharing application built with **Python and FastAPI**.
 
 The idea is simple: if computers are already connected to the same local network, why should you need cloud storage, messaging apps, or USB drives just to move a file from one machine to another?
 
 LocalDrop is built around that idea.
+
+---
+
+## 🚀 Download for Windows
+
+The easiest way to get started on Windows is to download the latest installer.
+
+### [⬇️ Download LocalDrop for Windows](https://github.com/feeridev/LocalDrop/releases/latest)
+
+Download the installer, run it, and LocalDrop will be installed on your Windows machine.
+
+No Python installation is required.
+
+After installation, LocalDrop can be launched from the **Desktop** or **Start Menu**.
+
+Once running, open:
+
+```text
+http://127.0.0.1:8000
+```
+
+Other devices on the same local network can access it using:
+
+```text
+http://YOUR-PC-IP:8000
+```
 
 ---
 
@@ -43,6 +69,7 @@ You can send a file directly to another LocalDrop user.
 
 ### 📤 Upload experience
 
+* Multiple file upload
 * Drag & drop
 * Upload progress
 * File size display
@@ -90,12 +117,12 @@ The local database and uploaded files are intentionally **not included in Git**.
 
 ---
 
-## 🚀 Run it locally
+## 🚀 Run it from source
 
 Clone the project:
 
 ```bash
-git clone git@github.com:feeridev/LocalDrop.git
+git clone https://github.com/feeridev/LocalDrop.git
 cd LocalDrop
 ```
 
@@ -181,7 +208,7 @@ The goal is to keep improving it until it becomes something that is genuinely us
 
 ## 🧪 Current status
 
-LocalDrop is still a work in progress.
+LocalDrop is still a work in progress, but the core functionality is working.
 
 Already working:
 
@@ -196,11 +223,16 @@ Already working:
 * [x] File metadata
 * [x] File icons
 * [x] Drag & drop
+* [x] Multiple file upload
 * [x] Upload progress
+* [x] Windows executable
+* [x] Windows installer
+* [x] Desktop & Start Menu shortcuts
+* [x] Windows firewall configuration
+* [x] Runtime data stored separately from the application
 
 Next things I want to work on:
 
-* [ ] Multi-file upload
 * [ ] Search
 * [ ] Sorting & filtering
 * [ ] File preview
@@ -210,8 +242,7 @@ Next things I want to work on:
 * [ ] Download as ZIP
 * [ ] Settings / administration
 * [ ] Better mobile UI
-* [ ] Windows desktop version
-* [ ] Windows installer
+* [ ] Automatic updates
 
 ---
 
@@ -233,8 +264,19 @@ New features will be added through separate commits so the Git history shows how
 
 ---
 
+## 📥 Downloads
+
+Windows installers are published through GitHub Releases.
+
+[**View all LocalDrop releases →**](https://github.com/feeridev/LocalDrop/releases)
+
+---
+
 ## 📄 License
 
 LocalDrop is licensed under the MIT License.
 
 Copyright (c) 2026 Farshad
+
+<img width="255" height="255" alt="Untitled design" src="https://github.com/user-attachments/assets/25894d3a-c6ec-42de-8c49-1b3a2ba207aa" />
+<img width="255" height="255" alt="Untitled design" src="https://github.com/user-attachments/assets/c1c53d3d-579b-4285-95ac-492671d98c3c" />
