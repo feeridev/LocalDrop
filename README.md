@@ -282,5 +282,4 @@ LocalDrop is licensed under the MIT License.
 
 Copyright (c) 2026 Farshad
 
-<img width="255" height="255" alt="Untitled design" src="https://github.com/user-attachments/assets/25894d3a-c6ec-42de-8c49-1b3a2ba207aa" />
-<img width="255" height="255" alt="Untitled design" src="https://github.com/user-attachments/assets/c1c53d3d-579b-4285-95ac-492671d98c3c" />
+
