@@ -18,7 +18,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?style=flat-square" alt="SQLAlchemy" />
   <img src="https://img.shields.io/badge/Jinja2-Templates-B41717?style=flat-square" alt="Jinja2" />
-  <img src="https://img.shields.io/badge/HTML-CSS-JavaScript-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML, CSS and JavaScript" />
+  <img src="https://img.shields.io/badge/HTML--CSS--JavaScript-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML, CSS and JavaScript" />
   <img src="https://img.shields.io/badge/Argon2-Password%20Hashing-6C5CE7?style=flat-square" alt="Argon2" />
   <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Windows installer" />
 </p>
